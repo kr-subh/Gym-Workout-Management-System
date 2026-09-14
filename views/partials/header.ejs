@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="FitZone — High-Performance Gym Membership, Custom Workout & Diet Plans, and Digital QR Access." />
+  <title><%= title %> | FitZone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="<%= locals.sessionUser ? 'theme-' + sessionUser.role : 'theme-guest' %>" data-theme="<%= locals.sessionUser ? sessionUser.role : 'guest' %>">
+
+  <!-- Premium Sticky Glass Navbar -->
+  <header class="navbar" id="site-navbar">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon-glow">🏋️</div>
+        <span>Fit<span class="brand-accent">Zone</span></span>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="nav-links desktop-nav" aria-label="Main Navigation">
+        <% if (locals.sessionUser) { %>
+
+          <% if (sessionUser.role === 'admin') { %>
+            <a href="/admin/dashboard"   class="nav-link">Dashboard</a>
+            <a href="/admin/members"     class="nav-link">Members</a>
+            <a href="/admin/trainers"    class="nav-link">Trainers</a>
+            <a href="/admin/memberships" class="nav-link">Plans</a>
+            <a href="/admin/payments"    class="nav-link">💰 Payments</a>
+            <a href="/admin/scan"        class="nav-link">🔍 Scanner</a>
+          <% } else if (sessionUser.role === 'trainer') { %>
+            <a href="/trainer/dashboard" class="nav-link">Dashboard</a>
+            <a href="/trainer/dashboard" class="nav-link">Assigned Members</a>
+          <% } else { %>
+            <a href="/member/dashboard"  class="nav-link">Dashboard</a>
+            <a href="/member/workout"    class="nav-link">Workout</a>
+            <a href="/member/diet"       class="nav-link">Diet</a>
+            <a href="/member/progress"   class="nav-link">Progress</a>
+            <a href="/member/attendance" class="nav-link">Attendance</a>
+            <a href="/member/plans"      class="nav-link">Plans</a>
+          <% } %>
+
+          <div class="nav-user-pill">
+            <span class="nav-user-avatar"><%= sessionUser.name.charAt(0).toUpperCase() %></span>
+            <span class="nav-user-name"><%= sessionUser.name %></span>
+            <span class="nav-role-badge role-<%= sessionUser.role %>"><%= sessionUser.role %></span>
+          </div>
+
+          <form action="/auth/logout" method="POST" style="display:inline;margin:0;">
+            <button type="submit" class="nav-logout-btn" title="Logout">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Logout
+            </button>
+          </form>
+
+        <% } else { %>
+          <a href="/#about"     class="nav-link">About</a>
+          <a href="/#features"  class="nav-link">Features</a>
+          <a href="/#how-it-works" class="nav-link">How It Works</a>
+          <a href="/#trainers"  class="nav-link">Trainers</a>
+          <a href="/#plans"     class="nav-link">Plans</a>
+
+          <!-- Staff & Role Portals Dropdown -->
+          <div class="nav-dropdown" id="nav-portals-dropdown">
+            <button class="nav-dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false">
+              <span>Portals</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px;"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="nav-dropdown-menu">
+              <div class="nav-dropdown-group">🥊 Trainer Portal</div>
+              <a href="/auth/login?role=trainer" class="nav-dropdown-item">
+                <span class="item-title">Trainer Login</span>
+                <span class="item-sub">Access Hub</span>
+              </a>
+              <a href="/auth/register?role=trainer" class="nav-dropdown-item">
+                <span class="item-title">Trainer Register</span>
+                <span class="item-sub">Join Staff</span>
+              </a>
+
+              <div class="nav-dropdown-divider"></div>
+
+              <div class="nav-dropdown-group">🛡️ Admin Console</div>
+              <a href="/auth/login?role=admin" class="nav-dropdown-item">
+                <span class="item-title">Admin Login</span>
+                <span class="item-sub">Console</span>
+              </a>
+              <a href="/auth/register?role=admin" class="nav-dropdown-item">
+                <span class="item-title">Admin Register</span>
+                <span class="item-sub">Setup</span>
+              </a>
+
+              <div class="nav-dropdown-divider"></div>
+
+              <div class="nav-dropdown-group">🏋️ Member Access</div>
+              <a href="/auth/login?role=member" class="nav-dropdown-item">
+                <span class="item-title">Member Login</span>
+                <span class="item-sub">Dashboard</span>
+              </a>
+              <a href="/auth/register?role=member" class="nav-dropdown-item">
+                <span class="item-title">Join FitZone</span>
+                <span class="item-sub">New Member</span>
+              </a>
+            </div>
+          </div>
+
+          <a href="/auth/login" class="nav-link nav-link-login">Login</a>
+          <a href="/auth/register" class="btn btn-sm btn-primary nav-cta-btn">Join Now →</a>
+        <% } %>
+      </nav>
+
+      <!-- Mobile Hamburger Button -->
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle navigation menu" onclick="toggleMobileNav()">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+      <div class="mobile-nav-content">
+        <% if (locals.sessionUser) { %>
+          <div class="mobile-user-profile">
+            <div class="mobile-avatar"><%= sessionUser.name.charAt(0).toUpperCase() %></div>
+            <div>
+              <div class="mobile-name"><%= sessionUser.name %></div>
+              <span class="nav-role-badge role-<%= sessionUser.role %>"><%= sessionUser.role %></span>
+            </div>
+          </div>
+
+          <div class="mobile-links-list">
+            <% if (sessionUser.role === 'admin') { %>
+              <a href="/admin/dashboard"   class="mobile-nav-item" onclick="toggleMobileNav()">📊 Dashboard</a>
+              <a href="/admin/members"     class="mobile-nav-item" onclick="toggleMobileNav()">👥 Members</a>
+              <a href="/admin/trainers"    class="mobile-nav-item" onclick="toggleMobileNav()">🏋️ Trainers</a>
+              <a href="/admin/memberships" class="mobile-nav-item" onclick="toggleMobileNav()">📋 Plans</a>
+              <a href="/admin/payments"    class="mobile-nav-item" onclick="toggleMobileNav()">💰 Payments</a>
+              <a href="/admin/scan"        class="mobile-nav-item" onclick="toggleMobileNav()">🔍 QR Scanner</a>
+            <% } else if (sessionUser.role === 'trainer') { %>
+              <a href="/trainer/dashboard" class="mobile-nav-item" onclick="toggleMobileNav()">📊 Dashboard</a>
+              <a href="/trainer/dashboard" class="mobile-nav-item" onclick="toggleMobileNav()">🏋️ Assigned Members</a>
+            <% } else { %>
+              <a href="/member/dashboard"  class="mobile-nav-item" onclick="toggleMobileNav()">📊 Dashboard</a>
+              <a href="/member/workout"    class="mobile-nav-item" onclick="toggleMobileNav()">📋 Workout Plan</a>
+              <a href="/member/diet"       class="mobile-nav-item" onclick="toggleMobileNav()">🥗 Diet Plan</a>
+              <a href="/member/progress"   class="mobile-nav-item" onclick="toggleMobileNav()">📈 Progress & Weights</a>
+              <a href="/member/attendance" class="mobile-nav-item" onclick="toggleMobileNav()">🗓️ Attendance</a>
+              <a href="/member/plans"      class="mobile-nav-item" onclick="toggleMobileNav()">💳 Membership Plans</a>
+            <% } %>
+          </div>
+
+          <form action="/auth/logout" method="POST" style="margin-top:1.5rem;">
+            <button type="submit" class="btn btn-full btn-outline" style="color:#ef4444;border-color:rgba(239,68,68,0.3);">
+              Logout
+            </button>
+          </form>
+        <% } else { %>
+          <div class="mobile-links-list">
+            <a href="/#about"        class="mobile-nav-item" onclick="toggleMobileNav()">About Gym</a>
+            <a href="/#features"     class="mobile-nav-item" onclick="toggleMobileNav()">Features</a>
+            <a href="/#how-it-works" class="mobile-nav-item" onclick="toggleMobileNav()">How It Works</a>
+            <a href="/#trainers"     class="mobile-nav-item" onclick="toggleMobileNav()">Trainers</a>
+            <a href="/#plans"        class="mobile-nav-item" onclick="toggleMobileNav()">Plans & Pricing</a>
+          </div>
+
+          <!-- Mobile Portals Section -->
+          <div class="mobile-portals-box">
+            <div class="mobile-portals-title">Staff & Management Portals</div>
+
+            <div class="mobile-portal-group" style="margin-bottom:0.75rem;">
+              <div class="mobile-portal-label">🥊 Trainer Portal</div>
+              <div class="mobile-portal-actions">
+                <a href="/auth/login?role=trainer" class="btn btn-outline" onclick="toggleMobileNav()">Trainer Login</a>
+                <a href="/auth/register?role=trainer" class="btn btn-outline" onclick="toggleMobileNav()">Register</a>
+              </div>
+            </div>
+
+            <div class="mobile-portal-group">
+              <div class="mobile-portal-label">🛡️ Admin Console</div>
+              <div class="mobile-portal-actions">
+                <a href="/auth/login?role=admin" class="btn btn-outline" onclick="toggleMobileNav()">Admin Login</a>
+                <a href="/auth/register?role=admin" class="btn btn-outline" onclick="toggleMobileNav()">Register</a>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:1.25rem;display:flex;gap:0.75rem;">
+            <a href="/auth/login" class="btn btn-outline" style="flex:1;text-align:center;" onclick="toggleMobileNav()">Member Login</a>
+            <a href="/auth/register" class="btn btn-primary" style="flex:1;text-align:center;" onclick="toggleMobileNav()">Join Now →</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </header>
+
+  <script>
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      const burger = document.getElementById('nav-hamburger');
+      drawer.classList.toggle('active');
+      burger.classList.toggle('active');
+      document.body.style.overflow = drawer.classList.contains('active') ? 'hidden' : '';
+    }
+  </script>
+

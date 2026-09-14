@@ -1,0 +1,23 @@
+{
+  "name": "gym-management",
+  "version": "1.0.0",
+  "description": "Gym Membership & Workout Plan Management System",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon -e js,mjs,cjs,json,env app.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.19.0",
+    "mongoose": "^8.5.1",
+    "qrcode": "^1.5.4",
+    "razorpay": "^2.9.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

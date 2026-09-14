@@ -1,0 +1,165 @@
+<%- include('../../partials/header') %>
+
+<main class="dashboard-page">
+
+  <div class="admin-header-row">
+    <div>
+      <div class="dashboard-eyebrow">Trainer / <%= member.name %> / <%= isEdit ? 'Edit' : 'New' %> Workout Plan</div>
+      <h1><%= isEdit ? 'Edit Workout Plan' : 'Create Workout Plan' %></h1>
+      <p class="text-muted">For: <strong><%= member.name %></strong></p>
+    </div>
+    <a href="/trainer/members/<%= member._id %>/workout" class="btn btn-secondary">← Back to Plan</a>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert alert-error" style="margin-bottom:1.5rem;"><%= error %></div>
+  <% } %>
+
+  <form action="<%= isEdit ? '/trainer/members/' + member._id + '/workout/edit' : '/trainer/members/' + member._id + '/workout' %>"
+        method="POST" id="workoutForm" style="margin-top:1.5rem;">
+
+    <!-- Plan-level fields -->
+    <div class="detail-card" style="margin-bottom:1.5rem;">
+      <h3 class="detail-card-title">📋 Plan Details</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="schedule">Schedule / Frequency</label>
+          <input type="text" id="schedule" name="schedule"
+                 value="<%= (plan && plan.schedule) || '' %>"
+                 placeholder="e.g. 5 days/week, Mon-Wed-Fri" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="notes">General Notes</label>
+          <input type="text" id="notes" name="notes"
+                 value="<%= (plan && plan.notes) || '' %>"
+                 placeholder="e.g. Focus on compound movements" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercises -->
+    <div class="detail-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">
+        <h3 style="font-size:1rem;font-weight:700;margin:0;">🏋️ Exercises</h3>
+        <button type="button" id="addExerciseBtn" class="btn btn-sm btn-outline">+ Add Exercise</button>
+      </div>
+
+      <div id="exercisesContainer">
+        <% const exercises = (plan && plan.exercises && plan.exercises.length > 0) ? plan.exercises : [{ exerciseName:'', sets:'', reps:'', day:'', notes:'' }]; %>
+        <% exercises.forEach((ex, i) => { %>
+          <div class="exercise-row" id="row-<%= i %>">
+            <div class="exercise-row-num"><%= i + 1 %></div>
+            <div class="exercise-row-fields">
+              <div class="form-group" style="margin-bottom:0;flex:2;">
+                <label>Exercise Name *</label>
+                <input type="text" name="exerciseName" required
+                       value="<%= ex.exerciseName || '' %>"
+                       placeholder="e.g. Barbell Squat" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;width:80px;">
+                <label>Sets *</label>
+                <input type="number" name="sets" required min="1" max="20"
+                       value="<%= ex.sets || '' %>" placeholder="3" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;width:80px;">
+                <label>Reps *</label>
+                <input type="number" name="reps" required min="1" max="200"
+                       value="<%= ex.reps || '' %>" placeholder="10" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;width:130px;">
+                <label>Day</label>
+                <select name="day">
+                  <option value="">Any</option>
+                  <% ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].forEach(d => { %>
+                    <option value="<%= d %>" <%= (ex.day === d) ? 'selected' : '' %>><%= d %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;flex:2;">
+                <label>Notes</label>
+                <input type="text" name="exerciseNotes"
+                       value="<%= ex.notes || '' %>"
+                       placeholder="e.g. Keep back straight" />
+              </div>
+            </div>
+            <button type="button" class="remove-exercise-btn" onclick="removeRow(this)" title="Remove exercise">✕</button>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div style="display:flex;gap:0.75rem;margin-top:1.5rem;">
+      <a href="/trainer/members/<%= member._id %>/workout" class="btn btn-secondary" style="flex:1;text-align:center;">Cancel</a>
+      <button type="submit" class="btn btn-primary" style="flex:3;">
+        <%= isEdit ? '💾 Save Changes' : '✅ Create Workout Plan' %>
+      </button>
+    </div>
+  </form>
+
+</main>
+
+<script>
+  let rowCount = <%= (plan && plan.exercises) ? plan.exercises.length : 1 %>;
+
+  document.getElementById('addExerciseBtn').addEventListener('click', () => {
+    rowCount++;
+    const container = document.getElementById('exercisesContainer');
+    const div = document.createElement('div');
+    div.className = 'exercise-row';
+    div.id = 'row-' + rowCount;
+    div.innerHTML = `
+      <div class="exercise-row-num">${container.querySelectorAll('.exercise-row').length + 1}</div>
+      <div class="exercise-row-fields">
+        <div class="form-group" style="margin-bottom:0;flex:2;">
+          <label>Exercise Name *</label>
+          <input type="text" name="exerciseName" required placeholder="e.g. Barbell Squat" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;width:80px;">
+          <label>Sets *</label>
+          <input type="number" name="sets" required min="1" max="20" placeholder="3" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;width:80px;">
+          <label>Reps *</label>
+          <input type="number" name="reps" required min="1" max="200" placeholder="10" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;width:130px;">
+          <label>Day</label>
+          <select name="day">
+            <option value="">Any</option>
+            ${['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map(d => `<option value="${d}">${d}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:2;">
+          <label>Notes</label>
+          <input type="text" name="exerciseNotes" placeholder="e.g. Keep back straight" />
+        </div>
+      </div>
+      <button type="button" class="remove-exercise-btn" onclick="removeRow(this)" title="Remove exercise">✕</button>
+    `;
+    container.appendChild(div);
+    renumberRows();
+    // Focus new exercise name input
+    div.querySelector('input[name="exerciseName"]').focus();
+  });
+
+  function removeRow(btn) {
+    const row = btn.closest('.exercise-row');
+    const container = document.getElementById('exercisesContainer');
+    if (container.querySelectorAll('.exercise-row').length <= 1) {
+      alert('A workout plan must have at least one exercise.');
+      return;
+    }
+    row.remove();
+    renumberRows();
+  }
+
+  function renumberRows() {
+    document.querySelectorAll('.exercise-row').forEach((row, i) => {
+      const numEl = row.querySelector('.exercise-row-num');
+      if (numEl) numEl.textContent = i + 1;
+    });
+  }
+</script>
+
+<%- include('../../partials/footer') %>

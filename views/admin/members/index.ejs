@@ -1,0 +1,86 @@
+<%- include('../../partials/header') %>
+
+<main class="dashboard-page">
+  <div class="admin-header-row">
+    <div>
+      <div class="dashboard-eyebrow">Admin / Members</div>
+      <h1>Member Management</h1>
+      <p>View and manage all registered gym members.</p>
+    </div>
+    <a href="/admin/dashboard" class="btn btn-secondary">← Dashboard</a>
+  </div>
+
+  <% if (successMsg) { %>
+    <div class="alert alert-success" style="margin-bottom:1rem;"><%= successMsg %></div>
+  <% } %>
+  <% if (errorMsg) { %>
+    <div class="alert alert-error" style="margin-bottom:1rem;"><%= errorMsg %></div>
+  <% } %>
+
+  <!-- Search -->
+  <form action="/admin/members" method="GET" class="search-form">
+    <input
+      type="text"
+      name="search"
+      value="<%= search %>"
+      placeholder="Search by name, email, or phone…"
+      class="search-input"
+    />
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+    <% if (search) { %>
+      <a href="/admin/members" class="btn btn-secondary btn-sm">Clear</a>
+    <% } %>
+  </form>
+
+  <!-- Table -->
+  <div class="data-table-wrap" style="margin-top:1.5rem;">
+    <% if (members.length === 0) { %>
+      <div class="empty-state">
+        <p><%= search ? 'No members matched your search.' : 'No members registered yet.' %></p>
+      </div>
+    <% } else { %>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Membership</th>
+            <th>Trainer</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% members.forEach(m => { %>
+            <tr>
+              <td>
+                <a href="/admin/members/<%= m._id %>" class="table-link"><%= m.name %></a>
+              </td>
+              <td class="text-muted"><%= m.email %></td>
+              <td class="text-muted"><%= m.phone || '—' %></td>
+              <td>
+                <% if (m.membership) { %>
+                  <span class="badge badge-<%= m.membership.level.toLowerCase().replace('+','-plus') %>"><%= m.membership.level %></span>
+                  <small class="text-muted"><%= m.membership.name %></small>
+                <% } else { %>
+                  <span class="text-muted" style="font-style:italic;">None</span>
+                <% } %>
+              </td>
+              <td class="text-muted"><%= m.trainer ? m.trainer.name : '—' %></td>
+              <td class="text-muted"><%= new Date(m.createdAt).toLocaleDateString('en-IN') %></td>
+              <td>
+                <div class="table-actions">
+                  <a href="/admin/members/<%= m._id %>" class="btn btn-sm btn-outline">View</a>
+                  <a href="/admin/members/<%= m._id %>/edit" class="btn btn-sm btn-secondary">Edit</a>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../../partials/footer') %>

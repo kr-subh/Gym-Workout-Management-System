@@ -1,0 +1,33 @@
+<%- include('../partials/header') %>
+
+<main class="dashboard-page">
+  <div class="lock-card">
+    <div class="lock-icon-circle">
+      <span class="lock-icon">🔒</span>
+    </div>
+    
+    <div class="lock-badge">Premium Feature</div>
+    <h2 class="lock-title"><%= featureLabel %></h2>
+    
+    <!-- User Requirement: Exact string -->
+    <p class="lock-message">Upgrade your membership to unlock this feature.</p>
+
+    <div class="lock-details">
+      <div class="lock-detail-item">
+        <span class="lock-label">Your Current Plan:</span>
+        <span class="badge badge-<%= currentLevel.toLowerCase().replace('+', '-plus') %>"><%= currentLevel %></span>
+      </div>
+      <div class="lock-detail-item">
+        <span class="lock-label">Required Plan:</span>
+        <span class="badge badge-<%= requiredLevel.toLowerCase().replace('+', '-plus') %>"><%= requiredLevel %> Tier</span>
+      </div>
+    </div>
+
+    <div class="lock-actions">
+      <a href="/member/plans" class="btn btn-primary btn-lg">View Membership Plans →</a>
+      <a href="/member/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

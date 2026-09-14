@@ -1,0 +1,117 @@
+<%- include('../partials/header') %>
+
+<main class="dashboard-page">
+  <div class="dashboard-header">
+    <div class="dashboard-eyebrow">Membership Tiers</div>
+    <h1>Choose Your Workout Plan</h1>
+    <p>Flexible plans tailored to your fitness goals. Upgrade anytime to unlock advanced features.</p>
+  </div>
+
+  <% if (successMsg) { %>
+    <div class="alert alert-success" style="max-width: 800px; margin: 1.5rem auto 0;"><%= successMsg %></div>
+  <% } %>
+  <% if (errorMsg) { %>
+    <div class="alert alert-error" style="max-width: 800px; margin: 1.5rem auto 0;"><%= errorMsg %></div>
+  <% } %>
+
+  <!-- Current Plan Status Banner -->
+  <div class="current-plan-banner" style="max-width: 900px; margin: 2rem auto 0;">
+    <div class="current-plan-info">
+      <span class="text-muted">Current Plan:</span>
+      <% if (currentMembership) { %>
+        <strong><%= currentMembership.name %></strong>
+        <span class="badge badge-<%= currentMembership.level.toLowerCase().replace('+', '-plus') %>"><%= currentMembership.level %></span>
+      <% } else { %>
+        <span class="text-muted" style="font-style: italic;">No active plan selected</span>
+      <% } %>
+    </div>
+    <div class="current-plan-quick-links">
+      <a href="/member/dashboard" class="btn btn-sm btn-outline">← Back to Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Plans Grid -->
+  <div class="member-pricing-grid">
+    <% plans.forEach(plan => { 
+        const isCurrent = currentMembership && currentMembership._id.toString() === plan._id.toString();
+        const isProPlus = plan.level === 'Pro+';
+        const isPro = plan.level === 'Pro';
+    %>
+      <div class="pricing-card <%= isCurrent ? 'pricing-card-current' : '' %> <%= isProPlus ? 'pricing-card-featured' : '' %>">
+        <% if (isProPlus) { %>
+          <div class="pricing-card-badge">MOST POPULAR</div>
+        <% } %>
+        <% if (isCurrent) { %>
+          <div class="pricing-card-active-tag">ACTIVE PLAN</div>
+        <% } %>
+
+        <div class="pricing-card-header">
+          <span class="badge badge-<%= plan.level.toLowerCase().replace('+', '-plus') %>"><%= plan.level %></span>
+          <h3 class="pricing-plan-name"><%= plan.name %></h3>
+          <div class="pricing-cost">
+            <span class="currency">₹</span>
+            <span class="price"><%= plan.price.toLocaleString('en-IN') %></span>
+            <span class="period">/ <%= plan.duration %></span>
+          </div>
+        </div>
+
+        <div class="pricing-card-features">
+          <div class="features-label">INCLUDED FEATURES</div>
+          <ul class="features-list">
+            <% plan.features.forEach(feature => { %>
+              <li>
+                <span class="check-icon">✓</span>
+                <span><%= feature %></span>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+
+        <div class="pricing-card-action">
+          <% if (isCurrent) { %>
+            <button class="btn btn-full btn-current" disabled>Current Active Plan</button>
+          <% } else { %>
+            <a href="/member/plans/pay/<%= plan._id %>" class="btn btn-full <%= isProPlus ? 'btn-primary' : 'btn-outline' %>">
+              💳 <%= currentMembership ? 'Switch to ' + plan.name : 'Subscribe to ' + plan.name %>
+            </a>
+          <% } %>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <!-- Feature Access Tester Section -->
+  <div class="feature-test-section" style="max-width: 900px; margin: 3.5rem auto 0;">
+    <div class="section-title-row">
+      <div>
+        <h3>🧪 Test Feature Access</h3>
+        <p class="text-muted" style="font-size: 0.88rem;">Click any feature below to test the centralized access check based on your active plan.</p>
+      </div>
+    </div>
+    
+    <div class="feature-test-grid">
+      <div class="feature-test-card">
+        <span class="badge badge-normal">Normal</span>
+        <h4>Basic Workout Plan</h4>
+        <p>Available on Normal, Pro, and Pro+</p>
+        <a href="/member/features/basic_workout_plan" class="btn btn-sm btn-outline">Test Feature →</a>
+      </div>
+
+      <div class="feature-test-card">
+        <span class="badge badge-pro">Pro</span>
+        <h4>Personalized Diet Plan</h4>
+        <p>Requires Pro or Pro+</p>
+        <a href="/member/features/personalized_diet_plan" class="btn btn-sm btn-outline">Test Feature →</a>
+      </div>
+
+      <div class="feature-test-card">
+        <span class="badge badge-pro-plus">Pro+</span>
+        <h4>Advanced Progress Analytics</h4>
+        <p>Requires Pro+ only</p>
+        <a href="/member/features/advanced_progress_analytics" class="btn btn-sm btn-outline">Test Feature →</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

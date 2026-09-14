@@ -1,0 +1,752 @@
+<%- include('partials/header') %>
+
+<main class="landing-page">
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       1. HERO SECTION (With Subtle 3D Perspective Depth & Card)
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <section class="hero-section" id="hero">
+    <div class="hero-bg-media">
+      <img src="/images/hero_gym_cinematic.jpg" alt="FitZone Barbell Deadlift Training" class="hero-bg-img" />
+      <div class="hero-bg-overlay"></div>
+    </div>
+    <div class="hero-bg-glow"></div>
+    <div class="hero-grid-lines"></div>
+
+    <div class="container hero-container">
+      <div class="hero-text-block">
+        <div class="hero-eyebrow-badge">
+          <span class="badge-pulse-dot"></span>
+          <span>HIGH PERFORMANCE FITNESS SYSTEM</span>
+        </div>
+
+        <h1 class="hero-headline">
+          BUILD YOUR<br>
+          <span class="gradient-text-hero">STRONGER SELF.</span>
+        </h1>
+
+        <p class="hero-description">
+          Elevate your physical potential with intelligent gym management. Seamless 30-second digital QR passes, personalized trainer-curated workout splits, customized nutrition macros, and real-time biometric progress analytics.
+        </p>
+
+        <div class="hero-cta-row">
+          <a href="/auth/register" class="btn btn-lg btn-primary hero-btn-main">
+            <span>JOIN NOW</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+          <a href="#plans" class="btn btn-lg btn-outline hero-btn-sub">
+            EXPLORE PLANS
+          </a>
+        </div>
+
+        <!-- Hero Stats Strip -->
+        <div class="hero-stats-strip">
+          <div class="hero-stat-item">
+            <span class="stat-number">2,500+</span>
+            <span class="stat-label">Active Members</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat-item">
+            <span class="stat-number">15+</span>
+            <span class="stat-label">Certified Coaches</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat-item">
+            <span class="stat-number">99.8%</span>
+            <span class="stat-label">Check-In Uptime</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D Interactive Perspective Hero Visual -->
+      <div class="hero-visual-block perspective-container" id="hero-perspective-wrap">
+        <div class="card-3d-pass" id="hero-3d-card">
+          <!-- Glass Card Header -->
+          <div class="pass-header">
+            <div class="pass-brand">
+              <span class="pass-logo">🏋️</span>
+              <span class="pass-title">FITZONE <strong>VIP PASS</strong></span>
+            </div>
+            <span class="pass-chip">NFC · QR ENABLED</span>
+          </div>
+
+          <!-- Card Body / Member Visual -->
+          <div class="pass-body">
+            <div class="pass-qr-box">
+              <!-- Live simulated QR graphic -->
+              <svg width="110" height="110" viewBox="0 0 100 100" class="pass-qr-svg">
+                <rect width="100" height="100" fill="#ffffff" rx="8"/>
+                <rect x="10" y="10" width="30" height="30" rx="3" fill="#080a0f"/>
+                <rect x="16" y="16" width="18" height="18" fill="#ffffff"/>
+                <rect x="20" y="20" width="10" height="10" fill="#ff5722"/>
+
+                <rect x="60" y="10" width="30" height="30" rx="3" fill="#080a0f"/>
+                <rect x="66" y="16" width="18" height="18" fill="#ffffff"/>
+                <rect x="70" y="20" width="10" height="10" fill="#ff5722"/>
+
+                <rect x="10" y="60" width="30" height="30" rx="3" fill="#080a0f"/>
+                <rect x="16" y="66" width="18" height="18" fill="#ffffff"/>
+                <rect x="20" y="70" width="10" height="10" fill="#ff5722"/>
+
+                <rect x="45" y="15" width="8" height="15" fill="#080a0f"/>
+                <rect x="45" y="40" width="10" height="20" fill="#ff5722"/>
+                <rect x="60" y="50" width="25" height="10" fill="#080a0f"/>
+                <rect x="70" y="68" width="15" height="18" fill="#080a0f"/>
+                <rect x="48" y="70" width="12" height="14" fill="#ff5722"/>
+              </svg>
+              <div class="qr-scan-bar"></div>
+            </div>
+
+            <div class="pass-member-info">
+              <div class="pass-member-name">ALEX R. MEMBER</div>
+              <div class="pass-tier-badge">PRO+ ELITE TIER</div>
+              <div class="pass-expiry-tag">30-SEC DYNAMIC TOKEN · ACTIVE</div>
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="pass-footer">
+            <div class="pass-status-pill">
+              <span class="status-dot"></span>
+              <span>ENTRY PERMITTED</span>
+            </div>
+            <div class="pass-id">FZ-892410-X</div>
+          </div>
+
+          <!-- 3D Reflection Glare Overlay -->
+          <div class="card-glare" id="card-glare"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       2. GYM INTRODUCTION SECTION
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <section class="section section-intro" id="about">
+    <div class="container">
+      <div class="intro-grid">
+        <div class="intro-visual">
+          <div class="intro-card-stack">
+            <div class="intro-glass-stat stat-floating-top">
+              <span class="stat-icon">⚡</span>
+              <div>
+                <div class="stat-val">24/7 Access</div>
+                <div class="stat-sub">Smart Keyless QR Gates</div>
+              </div>
+            </div>
+
+            <div class="intro-equipment-showcase">
+              <div class="intro-photo-frame">
+                <img src="/images/gym_floor_equipment.jpg" alt="FitZone Olympic Gym Floor & Rogue Power Cages" class="intro-equipment-img" />
+                <div class="intro-photo-overlay"></div>
+                <div class="intro-photo-badge">
+                  <span class="badge-pulse-dot" style="width:6px;height:6px;"></span>
+                  <span>ELEIKO & ROGUE EQUIPPED</span>
+                </div>
+              </div>
+
+              <div class="intro-main-card">
+                <div class="intro-badge">THE FITZONE PHILOSOPHY</div>
+                <h3>Where Science Meets Physical Mastery</h3>
+                <p>
+                  We believe that transformation is not an accident—it is a calculated equation of disciplined biomechanics, tailored nutrition, and elite environment. FitZone was engineered from the ground up to replace outdated paper check-ins and generic workouts with an integrated, intelligent ecosystem.
+                </p>
+                <div class="intro-features-list">
+                  <div class="intro-feature-row">
+                    <span class="check-icon">✓</span>
+                    <span>Olympic-grade Eleiko bars, Rogue power cages & calibrated plates</span>
+                  </div>
+                  <div class="intro-feature-row">
+                    <span class="check-icon">✓</span>
+                    <span>Direct assignment to vetted, nationally certified strength coaches</span>
+                  </div>
+                  <div class="intro-feature-row">
+                    <span class="check-icon">✓</span>
+                    <span>Full nutritional macro plans tailored to your exact dietary lifestyle</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="intro-glass-stat stat-floating-bottom">
+              <span class="stat-icon">🏆</span>
+              <div>
+                <div class="stat-val">3-Day Grace</div>
+                <div class="stat-sub">Guaranteed Entry Window</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="intro-content">
+          <div class="section-eyebrow">ABOUT FITZONE</div>
+          <h2 class="section-title">A Modern Fitness Haven Designed For High Achievers.</h2>
+          <p class="section-desc">
+            Traditional gyms leave you wandering from machine to machine with no roadmap. FitZone pairs you with certified specialists who design your routine, schedule your training, and monitor your weight trends week over week.
+          </p>
+
+          <div class="intro-stats-columns">
+            <div class="intro-stat-card">
+              <div class="intro-stat-big">15,000 sq ft</div>
+              <div class="intro-stat-text">Climate-controlled training floor with turf lanes & recovery zone.</div>
+            </div>
+            <div class="intro-stat-card">
+              <div class="intro-stat-big">100% Digital</div>
+              <div class="intro-stat-text">QR check-ins, automated attendance logging & instant billing.</div>
+            </div>
+          </div>
+
+          <div style="margin-top:2rem;">
+            <a href="/auth/register" class="btn btn-primary">Experience FitZone Today →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       3. HOW THE SYSTEM WORKS SECTION
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <section class="section section-how" id="how-it-works">
+    <div class="container">
+      <div class="section-header text-center">
+        <div class="section-eyebrow">SEAMLESS ONBOARDING</div>
+        <h2 class="section-title">How FitZone Works In 3 Steps</h2>
+        <p class="section-desc">Zero friction. Get started in minutes and begin training immediately.</p>
+      </div>
+
+      <div class="how-grid">
+        <!-- Step 1 -->
+        <div class="step-card">
+          <div class="step-number-pill">01</div>
+          <div class="step-icon">💳</div>
+          <h3 class="step-title">Select Plan & Secure Payment</h3>
+          <p class="step-desc">
+            Choose from Normal, Pro, or Pro+ Elite tiers. Checkout securely via Razorpay in Test Mode or select convenient offline payment verified at our front desk.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card">
+          <div class="step-number-pill">02</div>
+          <div class="step-icon">🏋️‍♂️</div>
+          <h3 class="step-title">Get Matched With a Coach</h3>
+          <p class="step-desc">
+            Gym administration pairs you with a certified trainer who reviews your dietary preferences and builds custom workout days tailored to your goals.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card">
+          <div class="step-number-pill">03</div>
+          <div class="step-icon">📱</div>
+          <h3 class="step-title">Scan Dynamic QR & Train</h3>
+          <p class="step-desc">
+            Generate one-time 30-second QR access tokens directly from your mobile dashboard. Scan at our entrance scanner for instant check-in & attendance tracking.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       4. KEY FEATURES SECTION
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <section class="section section-features" id="features">
+    <div class="container">
+      <div class="section-header text-center">
+        <div class="section-eyebrow">INTELLIGENT PLATFORM</div>
+        <h2 class="section-title">Engineered For Athletic Progress</h2>
+        <p class="section-desc">Every tool you need to stay accountable, fuel recovery, and surpass your personal records.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span>⚡</span>
+          </div>
+          <h3>Encrypted QR Check-In</h3>
+          <p>One-time cryptographic tokens refreshed every 30 seconds prevent screenshot sharing and enforce genuine gym attendance.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span>📋</span>
+          </div>
+          <h3>Personalized Split Routines</h3>
+          <p>Multi-day custom workout routines with exact exercise names, target sets, rep counts, and trainer recommendations.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span>🥗</span>
+          </div>
+          <h3>Macro Nutrition Regimens</h3>
+          <p>Meal-by-meal dietary guides customized for Vegetarian, Vegan, Non-Vegetarian, or Eggetarian lifestyles.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span>📈</span>
+          </div>
+          <h3>Weight & Biometric Tracking</h3>
+          <p>Log bodyweight logs over time with starting weight benchmark, delta changes, and interactive progress visualization.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span>🛡️</span>
+          </div>
+          <h3>Exact 3-Day Grace Period</h3>
+          <p>Never get locked out unexpectedly. A transparent 72-hour grace period ensures access remains active while you renew.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span>💰</span>
+          </div>
+          <h3>Dual Payment Options</h3>
+          <p>Instant online checkout powered by Razorpay test gateway or front-desk offline settlement verified by gym management.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       5. MEMBERSHIP PLANS SECTION
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <section class="section section-plans" id="plans">
+    <div class="container">
+      <div class="section-header text-center">
+        <div class="section-eyebrow">TRANSPARENT PRICING</div>
+        <h2 class="section-title">Choose Your Membership Tier</h2>
+        <p class="section-desc">Unlock higher tier features, priority trainer guidance, and comprehensive diet blueprints.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <% if (locals.plans && plans.length > 0) { %>
+          <% plans.forEach(plan => { %>
+            <% const isPopular = plan.level === 'Pro' || plan.name.toLowerCase().includes('pro athlete'); %>
+            <div class="pricing-card <%= isPopular ? 'pricing-card-popular' : '' %>">
+              <% if (isPopular) { %>
+                <div class="popular-ribbon">MOST POPULAR</div>
+              <% } %>
+
+              <div class="pricing-card-header">
+                <span class="badge badge-<%= plan.level.toLowerCase().replace('+', '-plus') %>">
+                  <%= plan.level %>
+                </span>
+                <h3 class="plan-name"><%= plan.name %></h3>
+                <div class="plan-duration">Duration: <strong><%= plan.duration %></strong></div>
+              </div>
+
+              <div class="pricing-card-price">
+                <span class="currency-symbol">₹</span>
+                <span class="price-amount"><%= Number(plan.price).toLocaleString('en-IN') %></span>
+                <span class="price-period">/ <%= plan.duration %></span>
+              </div>
+
+              <div class="pricing-features-list">
+                <% if (plan.features && plan.features.length > 0) { %>
+                  <% plan.features.forEach(f => { %>
+                    <div class="pricing-feature-item">
+                      <span class="feature-check">✓</span>
+                      <span><%= f %></span>
+                    </div>
+                  <% }) %>
+                <% } else { %>
+                  <div class="pricing-feature-item">
+                    <span class="feature-check">✓</span>
+                    <span>Full gym floor access & digital QR entry</span>
+                  </div>
+                <% } %>
+              </div>
+
+              <div class="pricing-action">
+                <a href="/auth/register" class="btn btn-full <%= isPopular ? 'btn-primary' : 'btn-outline' %>">
+                  Subscribe Now →
+                </a>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <!-- Fallback Plan Cards -->
+          <div class="pricing-card">
+            <div class="pricing-card-header">
+              <span class="badge badge-normal">Normal</span>
+              <h3 class="plan-name">Normal Fitness</h3>
+              <div class="plan-duration">1 Month</div>
+            </div>
+            <div class="pricing-card-price">
+              <span class="currency-symbol">₹</span>
+              <span class="price-amount">1,499</span>
+            </div>
+            <div class="pricing-features-list">
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> QR Gym Entry</div>
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> Attendance Tracking</div>
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> Weight Logging</div>
+            </div>
+            <a href="/auth/register" class="btn btn-full btn-outline">Select Normal →</a>
+          </div>
+
+          <div class="pricing-card pricing-card-popular">
+            <div class="popular-ribbon">MOST POPULAR</div>
+            <div class="pricing-card-header">
+              <span class="badge badge-pro">Pro</span>
+              <h3 class="plan-name">Pro Athlete</h3>
+              <div class="plan-duration">3 Months</div>
+            </div>
+            <div class="pricing-card-price">
+              <span class="currency-symbol">₹</span>
+              <span class="price-amount">3,499</span>
+            </div>
+            <div class="pricing-features-list">
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> QR Entry & Attendance</div>
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> Personalized Workout Plan</div>
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> Weight Progress Chart</div>
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> Personalized Diet Plan</div>
+            </div>
+            <a href="/auth/register" class="btn btn-full btn-primary">Select Pro →</a>
+          </div>
+
+          <div class="pricing-card">
+            <div class="pricing-card-header">
+              <span class="badge badge-pro-plus">Pro+</span>
+              <h3 class="plan-name">Pro+ Elite</h3>
+              <div class="plan-duration">6 Months</div>
+            </div>
+            <div class="pricing-card-price">
+              <span class="currency-symbol">₹</span>
+              <span class="price-amount">6,499</span>
+            </div>
+            <div class="pricing-features-list">
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> Everything in Pro</div>
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> Priority Trainer Support</div>
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> Advanced Progress Analytics</div>
+              <div class="pricing-feature-item"><span class="feature-check">✓</span> Custom Diet Optimization</div>
+            </div>
+            <a href="/auth/register" class="btn btn-full btn-outline">Select Pro+ →</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       6. TRAINERS SHOWCASE SECTION
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <section class="section section-trainers" id="trainers">
+    <div class="container">
+      <div class="section-header text-center">
+        <div class="section-eyebrow">WORLD-CLASS COACHING</div>
+        <h2 class="section-title">Meet Your Certified Coaches</h2>
+        <p class="section-desc">Passionate experts in bodybuilding, functional mobility, strength conditioning, and sports nutrition.</p>
+      </div>
+
+      <div class="trainers-grid">
+        <% if (locals.trainers && trainers.length > 0) { %>
+          <% trainers.forEach(t => { %>
+            <% 
+              const tLower = t.name.toLowerCase();
+              const coachImg = tLower.includes('sarah') ? '/images/coach_sarah.jpg' : tLower.includes('david') ? '/images/coach_david.jpg' : '/images/coach_marcus.jpg';
+            %>
+            <div class="trainer-card">
+              <div class="trainer-avatar-ring">
+                <img src="<%= coachImg %>" alt="<%= t.name %>" class="trainer-avatar-img" />
+              </div>
+              <h3 class="trainer-name"><%= t.name %></h3>
+              <div class="trainer-spec"><%= t.specialization || 'Master Fitness Coach' %></div>
+              <div class="trainer-exp-pill">
+                <span>⭐ <%= t.experience || '5+ Years Experience' %></span>
+              </div>
+              <p class="trainer-bio">Dedicated to formulating progressive overload programs and nutrition blueprints for high-performing athletes.</p>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="trainer-card">
+            <div class="trainer-avatar-ring">
+              <img src="/images/coach_marcus.jpg" alt="Coach Marcus" class="trainer-avatar-img" />
+            </div>
+            <h3 class="trainer-name">Coach Marcus</h3>
+            <div class="trainer-spec">Strength & Hypertrophy</div>
+            <div class="trainer-exp-pill"><span>⭐ 8+ Years</span></div>
+            <p class="trainer-bio">Specializing in barbell biomechanics, powerlifting periodization, and maximum hypertrophy splits.</p>
+          </div>
+          <div class="trainer-card">
+            <div class="trainer-avatar-ring">
+              <img src="/images/coach_sarah.jpg" alt="Coach Sarah" class="trainer-avatar-img" />
+            </div>
+            <h3 class="trainer-name">Coach Sarah</h3>
+            <div class="trainer-spec">HIIT & Mobility</div>
+            <div class="trainer-exp-pill"><span>⭐ 6+ Years</span></div>
+            <p class="trainer-bio">Expert in functional athletic conditioning, joint mobility restoration, and explosive metabolic training.</p>
+          </div>
+          <div class="trainer-card">
+            <div class="trainer-avatar-ring">
+              <img src="/images/coach_david.jpg" alt="Coach David" class="trainer-avatar-img" />
+            </div>
+            <h3 class="trainer-name">Coach David</h3>
+            <div class="trainer-spec">Bodybuilding & Diet</div>
+            <div class="trainer-exp-pill"><span>⭐ 10+ Years</span></div>
+            <p class="trainer-bio">Master of physique transformation, macronutrient periodization, and contest prep physiology.</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       7. QR GYM ENTRY SPOTLIGHT
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <section class="section section-qr-spotlight" id="qr-access">
+    <div class="container">
+      <div class="qr-spotlight-card">
+        <div class="qr-spotlight-text">
+          <div class="section-eyebrow">SECURITY FIRST</div>
+          <h2 class="section-title" style="color:#fff;">Frictionless Entrance With Dynamic QR Access</h2>
+          <p style="color:var(--text-muted);font-size:1.05rem;line-height:1.7;margin-bottom:1.5rem;">
+            No physical plastic tags, RFID cards, or fingerprints that can be shared. Each member generates a dynamic 30-second cryptographic token validated on the backend in real-time.
+          </p>
+
+          <div class="qr-benefits-list">
+            <div class="qr-benefit-item">
+              <span class="qr-benefit-icon">⏱️</span>
+              <div>
+                <strong>30-Second TTL</strong>: Screenshots expire immediately and cannot be reused by non-members.
+              </div>
+            </div>
+            <div class="qr-benefit-item">
+              <span class="qr-benefit-icon">🛡️</span>
+              <div>
+                <strong>Backend Verification</strong>: Server checks active plan and grace status before granting entrance.
+              </div>
+            </div>
+            <div class="qr-benefit-item">
+              <span class="qr-benefit-icon">📊</span>
+              <div>
+                <strong>Instant Attendance</strong>: Timestamp recorded automatically to your member profile upon scan.
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:2rem;">
+            <a href="/auth/register" class="btn btn-primary">Get Your Digital QR Pass →</a>
+          </div>
+        </div>
+
+        <div class="qr-spotlight-preview">
+          <div class="qr-preview-phone">
+            <div class="phone-screen">
+              <div class="phone-header">
+                <span class="phone-time">09:41</span>
+                <span class="phone-signal">●●●</span>
+              </div>
+              <div class="phone-pass-content">
+                <div class="phone-brand">🏋️ FITZONE PASS</div>
+                <div class="phone-qr-frame">
+                  <div class="phone-qr-scanline"></div>
+                  <!-- Mini QR demo -->
+                  <svg width="120" height="120" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#ffffff" rx="6"/>
+                    <rect x="10" y="10" width="30" height="30" fill="#080a0f"/>
+                    <rect x="15" y="15" width="20" height="20" fill="#ffffff"/>
+                    <rect x="20" y="20" width="10" height="10" fill="#ff5722"/>
+                    <rect x="60" y="10" width="30" height="30" fill="#080a0f"/>
+                    <rect x="65" y="15" width="20" height="20" fill="#ffffff"/>
+                    <rect x="70" y="20" width="10" height="10" fill="#ff5722"/>
+                    <rect x="10" y="60" width="30" height="30" fill="#080a0f"/>
+                    <rect x="15" y="65" width="20" height="20" fill="#ffffff"/>
+                    <rect x="20" y="70" width="10" height="10" fill="#ff5722"/>
+                    <rect x="46" y="20" width="8" height="18" fill="#080a0f"/>
+                    <rect x="45" y="45" width="10" height="15" fill="#ff5722"/>
+                    <rect x="60" y="52" width="25" height="10" fill="#080a0f"/>
+                  </svg>
+                </div>
+                <div class="phone-timer">
+                  <span class="phone-timer-num">28</span>
+                  <span class="phone-timer-text">sec remaining</span>
+                </div>
+                <div class="phone-status-badge">
+                  <span class="status-dot"></span> Active Entry
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       8. WORKOUT & PROGRESS TRACKING PREVIEWS
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <section class="section section-preview" id="progress-preview">
+    <div class="container">
+      <div class="preview-two-col">
+        <!-- Workout Plan Preview -->
+        <div class="preview-card">
+          <div class="preview-badge">CUSTOM TRAINING</div>
+          <h3 class="preview-title">Workout Plans Tailored To You</h3>
+          <div class="preview-media-banner">
+            <img src="/images/athlete_cable_workout.jpg" alt="FitZone Athletes Heavy Cable & Dumbbell Training" class="preview-media-img" />
+            <div class="preview-media-overlay">
+              <span class="preview-media-badge"><span class="badge-pulse-dot" style="width:6px;height:6px;"></span> COACH MONITORED</span>
+            </div>
+          </div>
+
+          <div class="demo-routine-box">
+            <div class="routine-day-header">
+              <span class="routine-day-name">Day 1 — Push (Chest & Shoulders)</span>
+              <span class="badge badge-pro" style="font-size:0.65rem;">Assigned</span>
+            </div>
+            <div class="routine-exercise-item">
+              <div class="ex-info">
+                <strong>Barbell Incline Bench Press</strong>
+                <span>4 Sets × 8–10 Reps</span>
+              </div>
+              <span class="badge badge-normal" style="font-size:0.7rem;">Compound</span>
+            </div>
+            <div class="routine-exercise-item">
+              <div class="ex-info">
+                <strong>Standing Dumbbell Overhead Press</strong>
+                <span>3 Sets × 10–12 Reps</span>
+              </div>
+              <span class="badge badge-normal" style="font-size:0.7rem;">Hypertrophy</span>
+            </div>
+            <div class="routine-exercise-item">
+              <div class="ex-info">
+                <strong>Cable Lateral Flyes & Dips</strong>
+                <span>3 Sets × 15 Reps</span>
+              </div>
+              <span class="badge badge-normal" style="font-size:0.7rem;">Burnout</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Tracking Preview -->
+        <div class="preview-card">
+          <div class="preview-badge">DATA ANALYTICS</div>
+          <h3 class="preview-title">Real-Time Progress & Bodyweight Logs</h3>
+          <p class="preview-desc">Monitor starting vs. current weight trends and monthly attendance consistency to sustain lasting fitness habits.</p>
+
+          <div class="demo-stats-box">
+            <div class="demo-stat-row">
+              <div class="demo-stat-pill">
+                <span class="pill-label">Starting Weight</span>
+                <span class="pill-val">84.5 kg</span>
+              </div>
+              <div class="demo-stat-pill highlight-pill">
+                <span class="pill-label">Current Weight</span>
+                <span class="pill-val">79.2 kg (<span style="color:#22c55e;">-5.3 kg</span>)</span>
+              </div>
+            </div>
+
+            <div class="demo-progress-bar-wrap">
+              <div class="bar-header">
+                <span>Monthly Attendance Goal</span>
+                <strong style="color:var(--accent);">18 / 20 Days (90%)</strong>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width: 90%;"></div>
+              </div>
+            </div>
+
+            <div class="demo-streak-box">
+              <span class="streak-flame">🔥</span>
+              <div>
+                <strong>3-Week Workout Streak!</strong>
+                <div class="text-muted" style="font-size:0.75rem;">Consistency rewarded with priority trainer feedback.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       9. CALL TO ACTION (CTA) SECTION
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <section class="section section-cta" id="cta">
+    <div class="container">
+      <div class="cta-banner-card">
+        <div class="cta-bg-media">
+          <img src="/images/hero_gym_cinematic.jpg" alt="FitZone High Performance Training" class="cta-bg-img" />
+          <div class="cta-bg-overlay"></div>
+        </div>
+        <div class="cta-mesh-bg"></div>
+        <div class="cta-content">
+          <div class="hero-eyebrow-badge" style="background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);color:#fff;">
+            READY TO TRANSFORM?
+          </div>
+          <h2 class="cta-headline">Start Your Journey At FitZone Today.</h2>
+          <p class="cta-sub">
+            Join thousands of members crushing their health milestones with intelligent check-in, verified trainers, and tailored nutrition.
+          </p>
+          <div class="cta-btn-row">
+            <a href="/auth/register" class="btn btn-lg btn-primary" style="padding:1rem 2.5rem;font-size:1.1rem;font-weight:800;">
+              CREATE FREE ACCOUNT →
+            </a>
+            <a href="/auth/login" class="btn btn-lg btn-outline" style="padding:1rem 2rem;font-size:1.1rem;">
+              Member Portal Login
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Interactive 3D Card Tilt Effect Script -->
+<script>
+(function() {
+  const card = document.getElementById('hero-3d-card');
+  const glare = document.getElementById('card-glare');
+  const wrap = document.getElementById('hero-perspective-wrap');
+
+  if (card && wrap) {
+    wrap.addEventListener('mousemove', (e) => {
+      const rect = wrap.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      // Calculate tilt angles (-15deg to +15deg)
+      const rotateX = ((y - centerY) / centerY) * -12;
+      const rotateY = ((x - centerX) / centerX) * 12;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`;
+
+      if (glare) {
+        const glareX = (x / rect.width) * 100;
+        const glareY = (y / rect.height) * 100;
+        glare.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.2) 0%, transparent 60%)`;
+      }
+    });
+
+    wrap.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+      if (glare) {
+        glare.style.background = 'transparent';
+      }
+    });
+  }
+})();
+</script>
+
+<%- include('partials/footer') %>

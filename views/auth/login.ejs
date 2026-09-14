@@ -1,0 +1,91 @@
+<%- include('../partials/header') %>
+
+<main class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <% if (selectedRole === 'admin') { %>🛡️<% } else if (selectedRole === 'trainer') { %>🥊<% } else { %>🏋️<% } %>
+    </div>
+    <h1 class="auth-title">
+      <% if (selectedRole === 'admin') { %>Admin Console<% } else if (selectedRole === 'trainer') { %>Trainer Portal<% } else { %>Welcome Back<% } %>
+    </h1>
+    <p class="auth-subtitle">
+      <% if (selectedRole === 'admin') { %>Login with administrator credentials<% } else if (selectedRole === 'trainer') { %>Access your assigned members & workouts<% } else { %>Login to your FitZone member dashboard<% } %>
+    </p>
+
+    <!-- Role Switcher Tabs -->
+    <div class="auth-role-tabs">
+      <a href="/auth/login?role=member" class="auth-role-tab <%= selectedRole === 'member' ? 'active' : '' %>">
+        🏋️ Member
+      </a>
+      <a href="/auth/login?role=trainer" class="auth-role-tab <%= selectedRole === 'trainer' ? 'active' : '' %>">
+        🥊 Trainer
+      </a>
+      <a href="/auth/login?role=admin" class="auth-role-tab <%= selectedRole === 'admin' ? 'active' : '' %>">
+        🛡️ Admin
+      </a>
+    </div>
+
+    <!-- Quick Demo Credentials Auto-Fill Hint -->
+    <div class="auth-demo-hint">
+      <% if (selectedRole === 'admin') { %>
+        <span>Demo: <code>admin@fitzone.com</code></span>
+        <button type="button" class="btn-demo-fill" onclick="fillCredentials('admin@fitzone.com', 'Admin@123')">Auto-fill</button>
+      <% } else if (selectedRole === 'trainer') { %>
+        <span>Demo: <code>trainer1@fitzone.com</code></span>
+        <button type="button" class="btn-demo-fill" onclick="fillCredentials('trainer1@fitzone.com', 'Trainer@123')">Auto-fill</button>
+      <% } else { %>
+        <span>Demo: <code>member@fitzone.com</code></span>
+        <button type="button" class="btn-demo-fill" onclick="fillCredentials('member@fitzone.com', 'Member@123')">Auto-fill</button>
+      <% } %>
+    </div>
+
+    <% if (success) { %>
+      <div class="alert alert-success" id="login-success"><%= success %></div>
+    <% } %>
+
+    <% if (error) { %>
+      <div class="alert alert-error" id="login-error"><%= error %></div>
+    <% } %>
+
+    <form action="/auth/login" method="POST" class="auth-form" id="login-form">
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="john@example.com"
+               value="<%= formData.email || '' %>" required autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Your password"
+               required autocomplete="current-password" />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" id="login-submit-btn">
+        Login to <%= selectedRole === 'admin' ? 'Admin Console' : (selectedRole === 'trainer' ? 'Trainer Hub' : 'Member Account') %>
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Don't have an account?
+      <% if (selectedRole === 'trainer') { %>
+        <a href="/auth/register?role=trainer">Register as Trainer</a>
+      <% } else if (selectedRole === 'admin') { %>
+        <a href="/auth/register?role=admin">Register as Admin</a>
+      <% } else { %>
+        <a href="/auth/register?role=member">Join as Member</a>
+      <% } %>
+    </p>
+
+  </div>
+</main>
+
+<script>
+function fillCredentials(email, pass) {
+  document.getElementById('email').value = email;
+  document.getElementById('password').value = pass;
+}
+</script>
+
+<%- include('../partials/footer') %>

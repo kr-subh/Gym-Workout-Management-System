@@ -1,0 +1,107 @@
+<%- include('../partials/header') %>
+
+<main class="dashboard-page">
+
+  <!-- Header -->
+  <div class="admin-header-row">
+    <div>
+      <div class="dashboard-eyebrow">Member / Attendance</div>
+      <h1>Attendance & Gym Entries</h1>
+      <p class="text-muted">Review your gym visits, workout consistency, and turnstile check-ins.</p>
+    </div>
+    <div style="display:flex;gap:0.75rem;">
+      <a href="/member/dashboard" class="btn btn-secondary">← Dashboard</a>
+      <form action="/member/qr-entry" method="POST">
+        <button type="submit" class="btn btn-primary">⚡ Scan & Check In</button>
+      </form>
+    </div>
+  </div>
+
+  <% if (successMsg) { %>
+    <div class="alert alert-success" style="margin-bottom:1.5rem;"><%= successMsg %></div>
+  <% } %>
+  <% if (errorMsg) { %>
+    <div class="alert alert-error" style="margin-bottom:1.5rem;"><%= errorMsg %></div>
+  <% } %>
+
+  <!-- Summary Stats Strip -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;margin-top:1.5rem;">
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Total Check-Ins</div>
+      <div style="font-size:2rem;font-weight:800;margin-top:0.35rem;color:#60a5fa;">
+        <%= attendanceStats.count %>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Total gym visits logged</div>
+    </div>
+
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Monthly Consistency Rate</div>
+      <div style="font-size:2rem;font-weight:800;margin-top:0.35rem;color:#34d399;">
+        <%= attendanceStats.rate %>%
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Based on 20 visits/month target</div>
+    </div>
+
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Consistency Level</div>
+      <div style="font-size:1.4rem;font-weight:700;margin-top:0.5rem;color:var(--accent);">
+        <%= attendanceStats.rate >= 80 ? '🔥 Dedicated Athlete' : (attendanceStats.rate >= 50 ? '⚡ Consistent' : '🌱 Building Habit') %>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Keep up the streak!</div>
+    </div>
+  </div>
+
+  <!-- Attendance History Table -->
+  <div style="margin-top:2.5rem;">
+    <div class="admin-header-row" style="margin-bottom:1rem;">
+      <h2 style="font-size:1.2rem;font-weight:700;">📅 Attendance History</h2>
+      <span class="text-muted" style="font-size:0.85rem;"><%= attendanceStats.count %> records</span>
+    </div>
+
+    <% if (attendanceStats.history.length === 0) { %>
+      <div class="empty-state">
+        <div style="font-size:3rem;margin-bottom:1rem;">🎫</div>
+        <p style="font-weight:600;">No attendance records found yet.</p>
+        <p class="text-muted" style="font-size:0.85rem;margin-top:0.35rem;">
+          Click the "⚡ Scan & Check In" button above or scan your QR code at the turnstile.
+        </p>
+      </div>
+    <% } else { %>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Entry Time</th>
+              <th>Method</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% attendanceStats.history.forEach((att, idx) => { %>
+              <tr>
+                <td class="text-muted"><%= idx + 1 %></td>
+                <td><strong><%= new Date(att.date).toLocaleDateString('en-IN', { weekday:'short', day:'2-digit', month:'short', year:'numeric' }) %></strong></td>
+                <td><span style="font-weight:600;"><%= att.entryTime || '—' %></span></td>
+                <td>
+                  <span class="badge badge-normal" style="font-size:0.75rem;">
+                    <%= att.method || 'Manual' %>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" style="background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3);font-size:0.75rem;">
+                    ✓ <%= att.status || 'Present' %>
+                  </span>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

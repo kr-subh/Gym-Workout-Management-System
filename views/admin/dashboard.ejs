@@ -1,0 +1,102 @@
+<%- include('../partials/header') %>
+
+<main class="dashboard-page">
+  <div class="dashboard-header">
+    <div class="dashboard-eyebrow">🛡️ Admin Panel</div>
+    <h1>Admin Dashboard</h1>
+    <p>Welcome back, <strong><%= user.name %></strong>. Here's a live overview of FitZone.</p>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value"><%= stats.totalMembers %></div>
+      <div class="stat-label">Total Members</div>
+    </div>
+    <div class="stat-card stat-card-green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value"><%= stats.activeMembers %></div>
+      <div class="stat-label">Active Members</div>
+    </div>
+    <div class="stat-card stat-card-muted">
+      <div class="stat-icon">⏸️</div>
+      <div class="stat-value"><%= stats.noMembershipMembers %></div>
+      <div class="stat-label">No Plan Assigned</div>
+    </div>
+    <div class="stat-card stat-card-orange">
+      <div class="stat-icon">🏃</div>
+      <div class="stat-value"><%= stats.todayAttendance %></div>
+      <div class="stat-label">Today's Attendance</div>
+    </div>
+    <div class="stat-card stat-card-blue">
+      <div class="stat-icon">🏋️</div>
+      <div class="stat-value"><%= stats.totalTrainers %></div>
+      <div class="stat-label">Total Trainers</div>
+    </div>
+    <div class="stat-card stat-card-warn">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-value"><%= stats.pendingPayments %></div>
+      <div class="stat-label">Pending Offline Payments</div>
+    </div>
+    <div class="stat-card stat-card-gold">
+      <div class="stat-icon">💰</div>
+      <div class="stat-value">₹<%= Number(stats.totalRevenue).toLocaleString('en-IN') %></div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+  </div>
+
+  <!-- Membership Plan Statistics -->
+  <div class="admin-section-row">
+    <div class="admin-section-card">
+      <h3 class="admin-section-title">📊 Membership Distribution</h3>
+      <div class="plan-stat-row">
+        <div class="plan-stat-item">
+          <span class="badge badge-normal">Normal</span>
+          <span class="plan-stat-count"><%= stats.planCounts.Normal || 0 %></span>
+          <span class="plan-stat-label">members</span>
+        </div>
+        <div class="plan-stat-item">
+          <span class="badge badge-pro">Pro</span>
+          <span class="plan-stat-count"><%= stats.planCounts.Pro || 0 %></span>
+          <span class="plan-stat-label">members</span>
+        </div>
+        <div class="plan-stat-item">
+          <span class="badge badge-pro-plus">Pro+</span>
+          <span class="plan-stat-count"><%= stats.planCounts['Pro+'] || 0 %></span>
+          <span class="plan-stat-label">members</span>
+        </div>
+        <div class="plan-stat-item">
+          <span class="badge" style="background:rgba(100,100,100,0.15);color:#94a3b8;border:1px solid rgba(100,100,100,0.3);">None</span>
+          <span class="plan-stat-count"><%= stats.noMembershipMembers || 0 %></span>
+          <span class="plan-stat-label">members</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="admin-section-card">
+      <h3 class="admin-section-title">⚡ Quick Actions</h3>
+      <div class="quick-actions-grid">
+        <a href="/admin/members" class="quick-action-btn">
+          <span>👥</span> Manage Members
+        </a>
+        <a href="/admin/trainers" class="quick-action-btn">
+          <span>🏋️</span> Manage Trainers
+        </a>
+        <a href="/admin/trainers/new" class="quick-action-btn">
+          <span>➕</span> Add Trainer
+        </a>
+        <a href="/admin/memberships" class="quick-action-btn">
+          <span>💳</span> Membership Plans
+        </a>
+        <a href="/admin/memberships/new" class="quick-action-btn">
+          <span>📋</span> Add Plan
+        </a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

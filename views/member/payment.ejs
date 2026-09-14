@@ -1,0 +1,238 @@
+<%- include('../partials/header') %>
+
+<main class="dashboard-page">
+
+  <div class="dashboard-header">
+    <div class="dashboard-eyebrow">💳 Secure Payment</div>
+    <h1>Complete Your Payment</h1>
+    <p>Choose your preferred payment method to activate your membership.</p>
+  </div>
+
+  <% if (successMsg) { %>
+    <div class="alert alert-success" style="max-width:700px;margin:1.5rem auto 0;"><%= successMsg %></div>
+  <% } %>
+  <% if (errorMsg) { %>
+    <div class="alert alert-error" style="max-width:700px;margin:1.5rem auto 0;"><%= errorMsg %></div>
+  <% } %>
+
+  <div style="max-width:700px;margin:2rem auto;">
+
+    <!-- Plan Summary Card -->
+    <div class="detail-card" style="margin-bottom:2rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <div style="font-size:0.75rem;text-transform:uppercase;color:var(--text-muted);font-weight:600;">Selected Plan</div>
+          <h2 style="font-size:1.3rem;font-weight:800;margin:0.25rem 0;">
+            <%= plan.name %>
+            <span class="badge badge-<%= plan.level.toLowerCase().replace('+', '-plus') %>" style="font-size:0.75rem;vertical-align:middle;">
+              <%= plan.level %>
+            </span>
+          </h2>
+          <div class="text-muted" style="font-size:0.85rem;">Duration: <%= plan.duration %></div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:2rem;font-weight:800;color:var(--accent);">
+            ₹<%= Number(plan.price).toLocaleString('en-IN') %>
+          </div>
+          <div class="text-muted" style="font-size:0.8rem;">One-time payment</div>
+        </div>
+      </div>
+
+      <% if (plan.features && plan.features.length > 0) { %>
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
+          <div style="font-size:0.75rem;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:0.5rem;">Features Included</div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+            <% plan.features.forEach(f => { %>
+              <span style="background:rgba(99,102,241,0.1);color:#6366f1;padding:3px 10px;border-radius:20px;font-size:0.78rem;font-weight:500;">✓ <%= f %></span>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Payment Method Selection -->
+    <div class="detail-card">
+      <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:1.25rem;">Choose Payment Method</h3>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+
+        <!-- Online Payment Button -->
+        <button type="button" id="btn-pay-online" class="btn btn-primary" onclick="payOnline()" style="padding:1.25rem;font-size:1rem;display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;">💳</span>
+          <span style="font-weight:700;">Pay Online</span>
+          <span style="font-size:0.78rem;opacity:0.8;">UPI · Card · Net Banking</span>
+        </button>
+
+        <!-- Offline Payment Button -->
+        <form action="/member/payment/offline" method="POST">
+          <input type="hidden" name="planId" value="<%= plan._id %>" />
+          <button type="submit" class="btn btn-outline" style="padding:1.25rem;font-size:1rem;width:100%;display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+            <span style="font-size:1.5rem;">🏦</span>
+            <span style="font-weight:700;">Pay Offline</span>
+            <span style="font-size:0.78rem;opacity:0.8;">Pay at Gym Reception</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Payment Status Area -->
+      <div id="payment-status" style="margin-top:1.5rem;display:none;">
+        <div id="payment-result-card" style="border-radius:12px;padding:1.5rem;text-align:center;">
+          <div id="payment-result-icon" style="font-size:3rem;margin-bottom:0.5rem;"></div>
+          <div id="payment-result-title" style="font-size:1.15rem;font-weight:800;margin-bottom:0.35rem;"></div>
+          <div id="payment-result-message" style="font-size:0.9rem;"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.25rem;text-align:center;">
+        <a href="/member/plans" class="text-muted" style="font-size:0.85rem;text-decoration:underline;">← Back to Plans</a>
+      </div>
+    </div>
+
+    <!-- Security Notice -->
+    <div style="text-align:center;margin-top:1.5rem;">
+      <p class="text-muted" style="font-size:0.78rem;">
+        🔒 All online payments are processed securely via Razorpay in test mode.<br>
+        No real money will be charged. Your payment details are never stored on our servers.
+      </p>
+    </div>
+  </div>
+
+</main>
+
+<!-- Razorpay Checkout Script (loaded from Razorpay CDN — only public key used) -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+async function payOnline() {
+  const btn = document.getElementById('btn-pay-online');
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+
+  try {
+    // Step 1: Create Razorpay order on backend
+    const res = await fetch('/member/payment/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ planId: '<%= plan._id %>' }),
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      showPaymentResult('error', data.isAuthError ? '⚠️' : '❌', data.isAuthError ? 'Payment Gateway Notice' : 'Order Creation Failed', data.message || 'Failed to initialize payment.');
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      return;
+    }
+
+    // Step 2: Open Razorpay Checkout (public key only — secret never exposed)
+    const options = {
+      key: data.keyId,
+      amount: data.amount,
+      currency: data.currency,
+      name: 'FitZone Gym',
+      description: data.planName + ' Membership',
+      order_id: data.orderId,
+      handler: async function(response) {
+        // Step 3: Verify payment on backend (never trust frontend)
+        try {
+          const verifyRes = await fetch('/member/payment/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              planId: '<%= plan._id %>',
+            }),
+          });
+          const verifyData = await verifyRes.json();
+
+          if (verifyData.success) {
+            showPaymentResult('success', '✅', 'Payment Successful!', verifyData.message);
+            setTimeout(() => { window.location.href = '/member/dashboard?success=Membership activated! Welcome to FitZone.'; }, 2000);
+          } else {
+            showPaymentResult('error', '❌', 'Verification Failed', verifyData.message);
+          }
+        } catch (err) {
+          showPaymentResult('error', '⚠️', 'Verification Error', 'Could not verify payment. Contact support.');
+        }
+      },
+      prefill: {
+        name: '<%= memberName %>',
+      },
+      theme: {
+        color: '#6366f1',
+      },
+      modal: {
+        ondismiss: function() {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          // Notify backend of user cancellation
+          fetch('/member/payment/fail', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: data.orderId,
+              error_code: 'PAYMENT_CANCELLED',
+              error_description: 'Checkout was cancelled by the user.',
+            }),
+          }).catch(function() {});
+        },
+      },
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function(response) {
+      const errDetail = (response.error && response.error.description) ? response.error.description : 'Payment was unsuccessful.';
+      const errCode = (response.error && response.error.code) ? response.error.code : 'PAYMENT_FAILED';
+
+      // Notify backend to mark payment status as failed in database
+      fetch('/member/payment/fail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_order_id: (response.error && response.error.metadata && response.error.metadata.order_id) || data.orderId,
+          razorpay_payment_id: response.error && response.error.metadata && response.error.metadata.payment_id,
+          error_code: errCode,
+          error_description: errDetail,
+        }),
+      }).catch(function() {});
+
+      showPaymentResult('error', '❌', 'Payment Failed', errDetail);
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    });
+    rzp.open();
+
+  } catch (err) {
+    showPaymentResult('error', '⚠️', 'Network Error', 'Could not connect to payment server.');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+}
+
+function showPaymentResult(type, icon, title, message) {
+  const container = document.getElementById('payment-status');
+  const card = document.getElementById('payment-result-card');
+  const iconEl = document.getElementById('payment-result-icon');
+  const titleEl = document.getElementById('payment-result-title');
+  const msgEl = document.getElementById('payment-result-message');
+
+  container.style.display = 'block';
+  iconEl.textContent = icon;
+  titleEl.textContent = title;
+  msgEl.textContent = message;
+
+  if (type === 'success') {
+    card.style.background = 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.05))';
+    card.style.border = '2px solid rgba(34,197,94,0.3)';
+    titleEl.style.color = '#22c55e';
+  } else {
+    card.style.background = 'linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05))';
+    card.style.border = '2px solid rgba(239,68,68,0.3)';
+    titleEl.style.color = '#ef4444';
+  }
+}
+</script>
+
+<%- include('../partials/footer') %>

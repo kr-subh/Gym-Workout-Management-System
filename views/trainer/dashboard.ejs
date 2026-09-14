@@ -1,0 +1,96 @@
+<%- include('../partials/header') %>
+
+<main class="dashboard-page">
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="dashboard-eyebrow">💪 Trainer Panel</div>
+    <h1>Trainer Dashboard</h1>
+    <p>Welcome back, <strong><%= trainer.name %></strong>. You have <strong><%= memberCount %></strong> assigned member<%= memberCount !== 1 ? 's' : '' %>.</p>
+  </div>
+
+  <!-- Trainer Profile Strip -->
+  <div class="trainer-profile-card" style="margin-top:2rem;">
+    <div class="trainer-profile-avatar">
+      <%= trainer.name ? trainer.name.charAt(0).toUpperCase() : 'T' %>
+    </div>
+    <div class="trainer-profile-info">
+      <div class="trainer-profile-name"><%= trainer.name %></div>
+      <div class="trainer-profile-meta">
+        <% if (trainer.email) { %><span>✉️ <%= trainer.email %></span><% } %>
+        <% if (trainer.phone) { %><span>📞 <%= trainer.phone %></span><% } %>
+        <span class="nav-role-badge" style="font-size:0.72rem;">Trainer</span>
+      </div>
+    </div>
+    <div class="trainer-profile-stat">
+      <div class="trainer-stat-num"><%= memberCount %></div>
+      <div class="trainer-stat-label">Assigned Members</div>
+    </div>
+  </div>
+
+  <!-- Assigned Members -->
+  <div style="margin-top:2.5rem;">
+    <div class="admin-header-row" style="margin-bottom:1.25rem;">
+      <h2 style="font-size:1.25rem;font-weight:700;">Your Members</h2>
+    </div>
+
+    <% if (members.length === 0) { %>
+      <div class="empty-state">
+        <div style="font-size:3rem;margin-bottom:1rem;">👥</div>
+        <p>No members have been assigned to you yet.</p>
+        <p style="font-size:0.85rem;margin-top:0.5rem;">Ask your admin to assign members.</p>
+      </div>
+    <% } else { %>
+      <div class="members-cards-grid">
+        <% members.forEach(m => { %>
+          <div class="member-card">
+            <div class="member-card-top">
+              <div class="member-avatar"><%= m.name.charAt(0).toUpperCase() %></div>
+              <div class="member-card-info">
+                <div class="member-card-name"><%= m.name %></div>
+                <div class="member-card-email text-muted"><%= m.email %></div>
+              </div>
+            </div>
+
+            <div class="member-card-details">
+              <div class="member-detail-row">
+                <span class="detail-label">Membership</span>
+                <span>
+                  <% if (m.membership) { %>
+                    <span class="badge badge-<%= m.membership.level.toLowerCase().replace('+','-plus') %>"><%= m.membership.level %></span>
+                    <small class="text-muted"><%= m.membership.name %></small>
+                  <% } else { %>
+                    <span class="text-muted" style="font-style:italic;">No plan</span>
+                  <% } %>
+                </span>
+              </div>
+              <div class="member-detail-row">
+                <span class="detail-label">Diet</span>
+                <span class="text-muted"><%= m.dietPreference || '—' %></span>
+              </div>
+              <div class="member-detail-row">
+                <span class="detail-label">Joined</span>
+                <span class="text-muted"><%= new Date(m.createdAt).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) %></span>
+              </div>
+            </div>
+
+            <div class="member-card-actions">
+              <a href="/trainer/members/<%= m._id %>/workout" class="btn btn-sm btn-primary" style="flex:1;text-align:center;">
+                📋 Workout
+              </a>
+              <a href="/trainer/members/<%= m._id %>/diet" class="btn btn-sm btn-outline" style="flex:1;text-align:center;">
+                🥗 Diet
+              </a>
+              <a href="/trainer/members/<%= m._id %>/progress" class="btn btn-sm btn-outline" style="flex:1;text-align:center;">
+                📈 Progress
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

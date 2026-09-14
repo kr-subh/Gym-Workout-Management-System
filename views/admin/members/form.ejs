@@ -1,0 +1,71 @@
+<%- include('../../partials/header') %>
+
+<main class="dashboard-page">
+  <div class="admin-header-row">
+    <div>
+      <div class="dashboard-eyebrow">Admin / Members / Edit</div>
+      <h1><%= title %></h1>
+    </div>
+    <a href="/admin/members" class="btn btn-secondary">← All Members</a>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert alert-error" style="margin-bottom:1.5rem;"><%= error %></div>
+  <% } %>
+
+  <div class="auth-card" style="max-width:600px; margin:0 auto;">
+    <form action="/admin/members/<%= member._id %>/edit" method="POST" class="auth-form">
+
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" required value="<%= member.name || '' %>" />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone" value="<%= member.phone || '' %>" placeholder="+91 98765 43210" />
+      </div>
+
+      <div class="form-group">
+        <label for="dietPreference">Diet Preference</label>
+        <select id="dietPreference" name="dietPreference">
+          <option value="">— None —</option>
+          <% ['Vegetarian','Non-Vegetarian','Eggetarian','Vegan'].forEach(opt => { %>
+            <option value="<%= opt %>" <%= member.dietPreference === opt ? 'selected' : '' %>><%= opt %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="membership">Membership Plan</label>
+        <select id="membership" name="membership">
+          <option value="">— None —</option>
+          <% if (locals.memberships && memberships.length) { %>
+            <% memberships.forEach(plan => { %>
+              <option value="<%= plan._id %>" <%= member.membership && ((member.membership._id || member.membership).toString()) === plan._id.toString() ? 'selected' : '' %>><%= plan.name %> (<%= plan.level %> — ₹<%= Number(plan.price).toLocaleString('en-IN') %>)</option>
+            <% }) %>
+          <% } %>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="trainer">Assigned Trainer</label>
+        <select id="trainer" name="trainer">
+          <option value="">— None —</option>
+          <% if (locals.trainers && trainers.length) { %>
+            <% trainers.forEach(t => { %>
+              <option value="<%= t._id %>" <%= member.trainer && ((member.trainer._id || member.trainer).toString()) === t._id.toString() ? 'selected' : '' %>><%= t.name %> (<%= t.email %>)</option>
+            <% }) %>
+          <% } %>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <a href="/admin/members/<%= member._id %>" class="btn btn-secondary" style="flex:1;text-align:center;">Cancel</a>
+        <button type="submit" class="btn btn-primary" style="flex:2;">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('../../partials/footer') %>

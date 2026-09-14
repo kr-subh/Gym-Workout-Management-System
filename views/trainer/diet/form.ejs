@@ -1,0 +1,166 @@
+<%- include('../../partials/header') %>
+
+<main class="dashboard-page">
+
+  <div class="admin-header-row">
+    <div>
+      <div class="dashboard-eyebrow">Trainer / <%= member.name %> / <%= isEdit ? 'Edit' : 'New' %> Diet Plan</div>
+      <h1><%= isEdit ? 'Edit Diet Plan' : 'Create Diet Plan' %></h1>
+      <p class="text-muted">For: <strong><%= member.name %></strong> (Member Stated Preference: <strong><%= member.dietPreference || 'Not Specified' %></strong>)</p>
+    </div>
+    <a href="/trainer/members/<%= member._id %>/diet" class="btn btn-secondary">← Back to Plan</a>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert alert-error" style="margin-bottom:1.5rem;"><%= error %></div>
+  <% } %>
+
+  <form action="<%= isEdit ? '/trainer/members/' + member._id + '/diet/edit' : '/trainer/members/' + member._id + '/diet' %>"
+        method="POST" id="dietForm" style="margin-top:1.5rem;">
+
+    <!-- Plan-level fields -->
+    <div class="detail-card" style="margin-bottom:1.5rem;">
+      <h3 class="detail-card-title">🥗 Diet Configuration</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="dietPreference">Diet Preference *</label>
+          <select id="dietPreference" name="dietPreference" required>
+            <% const currentPref = (plan && plan.dietPreference) || member.dietPreference || 'Vegetarian'; %>
+            <option value="Vegetarian" <%= currentPref === 'Vegetarian' ? 'selected' : '' %>>Vegetarian</option>
+            <option value="Non-Vegetarian" <%= currentPref === 'Non-Vegetarian' ? 'selected' : '' %>>Non-Vegetarian</option>
+            <option value="Vegan" <%= currentPref === 'Vegan' ? 'selected' : '' %>>Vegan</option>
+            <option value="Eggetarian" <%= currentPref === 'Eggetarian' ? 'selected' : '' %>>Eggetarian</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="notes">General Diet Notes / Instructions</label>
+          <input type="text" id="notes" name="notes"
+                 value="<%= (plan && plan.notes) || '' %>"
+                 placeholder="e.g. Drink 3L water daily, avoid processed sugar" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Meals -->
+    <div class="detail-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">
+        <h3 style="font-size:1rem;font-weight:700;margin:0;">🍽️ Meals</h3>
+        <button type="button" id="addMealBtn" class="btn btn-sm btn-outline">+ Add Meal</button>
+      </div>
+
+      <div id="mealsContainer">
+        <% const meals = (plan && plan.meals && plan.meals.length > 0) ? plan.meals : [{ mealType:'Breakfast', food:'', quantity:'', timing:'', notes:'' }]; %>
+        <% meals.forEach((m, i) => { %>
+          <div class="exercise-row" id="meal-row-<%= i %>">
+            <div class="exercise-row-num"><%= i + 1 %></div>
+            <div class="exercise-row-fields">
+              <div class="form-group" style="margin-bottom:0;width:130px;">
+                <label>Meal Type *</label>
+                <select name="mealType" required>
+                  <% ['Breakfast','Lunch','Snack','Dinner'].forEach(type => { %>
+                    <option value="<%= type %>" <%= (m.mealType === type || m.type === type) ? 'selected' : '' %>><%= type %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;flex:2;">
+                <label>Food Item *</label>
+                <input type="text" name="food" required
+                       value="<%= m.food || '' %>"
+                       placeholder="e.g. Oats with milk & almonds" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;width:110px;">
+                <label>Quantity</label>
+                <input type="text" name="quantity"
+                       value="<%= m.quantity || '' %>" placeholder="e.g. 1 bowl, 200g" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;width:110px;">
+                <label>Timing</label>
+                <input type="text" name="timing"
+                       value="<%= m.timing || '' %>" placeholder="e.g. 8:30 AM" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;flex:2;">
+                <label>Notes</label>
+                <input type="text" name="mealNotes"
+                       value="<%= m.notes || '' %>"
+                       placeholder="e.g. Low sodium, with water" />
+              </div>
+            </div>
+            <button type="button" class="remove-exercise-btn" onclick="removeMealRow(this)" title="Remove meal">✕</button>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div style="display:flex;gap:0.75rem;margin-top:1.5rem;">
+      <a href="/trainer/members/<%= member._id %>/diet" class="btn btn-secondary" style="flex:1;text-align:center;">Cancel</a>
+      <button type="submit" class="btn btn-primary" style="flex:3;">
+        <%= isEdit ? '💾 Save Diet Plan' : '✅ Create Diet Plan' %>
+      </button>
+    </div>
+  </form>
+
+</main>
+
+<script>
+  let mealRowCount = <%= (plan && plan.meals) ? plan.meals.length : 1 %>;
+
+  document.getElementById('addMealBtn').addEventListener('click', () => {
+    mealRowCount++;
+    const container = document.getElementById('mealsContainer');
+    const div = document.createElement('div');
+    div.className = 'exercise-row';
+    div.id = 'meal-row-' + mealRowCount;
+    div.innerHTML = `
+      <div class="exercise-row-num">${container.querySelectorAll('.exercise-row').length + 1}</div>
+      <div class="exercise-row-fields">
+        <div class="form-group" style="margin-bottom:0;width:130px;">
+          <label>Meal Type *</label>
+          <select name="mealType" required>
+            ${['Breakfast','Lunch','Snack','Dinner'].map(t => `<option value="${t}">${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:2;">
+          <label>Food Item *</label>
+          <input type="text" name="food" required placeholder="e.g. Brown rice + Grilled paneer" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;width:110px;">
+          <label>Quantity</label>
+          <input type="text" name="quantity" placeholder="e.g. 150g" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;width:110px;">
+          <label>Timing</label>
+          <input type="text" name="timing" placeholder="e.g. 1:30 PM" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:2;">
+          <label>Notes</label>
+          <input type="text" name="mealNotes" placeholder="e.g. Fresh green salad on side" />
+        </div>
+      </div>
+      <button type="button" class="remove-exercise-btn" onclick="removeMealRow(this)" title="Remove meal">✕</button>
+    `;
+    container.appendChild(div);
+    renumberMealRows();
+    div.querySelector('input[name="food"]').focus();
+  });
+
+  function removeMealRow(btn) {
+    const row = btn.closest('.exercise-row');
+    const container = document.getElementById('mealsContainer');
+    if (container.querySelectorAll('.exercise-row').length <= 1) {
+      alert('A diet plan must have at least one meal item.');
+      return;
+    }
+    row.remove();
+    renumberMealRows();
+  }
+
+  function renumberMealRows() {
+    document.querySelectorAll('#mealsContainer .exercise-row').forEach((row, i) => {
+      const numEl = row.querySelector('.exercise-row-num');
+      if (numEl) numEl.textContent = i + 1;
+    });
+  }
+</script>
+
+<%- include('../../partials/footer') %>

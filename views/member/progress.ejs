@@ -1,0 +1,718 @@
+<%- include('../partials/header') %>
+
+<style>
+  .stat-change-good { color: #34d399; font-weight: 700; }
+  .stat-change-bad { color: #f87171; font-weight: 700; }
+  .badge-card-unlocked { padding: 1rem; background: rgba(16, 185, 129, 0.08) !important; border-color: rgba(16, 185, 129, 0.35) !important; }
+  .badge-card-locked { padding: 1rem; background: rgba(0, 0, 0, 0.2) !important; border-color: var(--border) !important; }
+  .freq-bar { width: 100%; max-width: 28px; border-radius: 4px; transition: height 0.3s ease; }
+  .freq-bar-active { background: linear-gradient(180deg, var(--accent, #10b981), #059669); }
+  .freq-bar-inactive { background: rgba(255, 255, 255, 0.06); }
+</style>
+
+<main class="dashboard-page">
+
+  <!-- Header -->
+  <div class="admin-header-row">
+    <div>
+      <div class="dashboard-eyebrow">Member / Transformation & Progress</div>
+      <h1>My Fitness Progress & Transformation Hub</h1>
+      <p class="text-muted">Track body composition, workout consistency, circumferences, and nutrition milestones.</p>
+    </div>
+    <a href="/member/dashboard" class="btn btn-secondary">← Dashboard</a>
+  </div>
+
+  <% if (successMsg) { %>
+    <div class="alert alert-success" style="margin-bottom:1.5rem;"><%= successMsg %></div>
+  <% } %>
+  <% if (errorMsg) { %>
+    <div class="alert alert-error" style="margin-bottom:1.5rem;"><%= errorMsg %></div>
+  <% } %>
+
+  <!-- ROW 1: 4 CORE TRANSFORMATION PILLARS -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:1rem;margin-top:1.5rem;">
+
+    <!-- Current Weight & Delta -->
+    <div class="card" style="padding:1.25rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Body Weight</span>
+        <span style="font-size:1.1rem;">⚖️</span>
+      </div>
+      <div style="font-size:1.85rem;font-weight:800;margin-top:0.35rem;color:var(--accent);">
+        <%= weightStats.currentWeight ? weightStats.currentWeight + ' kg' : '—' %>
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">
+        <% if (weightStats.startingWeight) { %>
+          Started at <strong><%= weightStats.startingWeight %> kg</strong> 
+          (<span class="<%= weightStats.weightChange <= 0 ? 'stat-change-good' : 'stat-change-bad' %>">
+            <%= weightStats.weightChange > 0 ? '+' : '' %><%= weightStats.weightChange %> kg
+          </span>)
+        <% } else { %>
+          Log your first weight entry below
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Target Goal Weight Tracker -->
+    <div class="card" style="padding:1.25rem;" id="target-goal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Target Goal Weight</span>
+        <button type="button" onclick="promptSetTargetWeight()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.75rem;font-weight:600;" title="Edit Target Weight">✏️ Set Goal</button>
+      </div>
+      <div style="font-size:1.85rem;font-weight:800;margin-top:0.35rem;color:#38bdf8;">
+        <span id="target-weight-display">70.0</span> kg
+      </div>
+      <!-- Goal Progress Bar -->
+      <div style="margin-top:0.5rem;">
+        <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text-muted);margin-bottom:4px;">
+          <span>Goal Progress</span>
+          <span id="goal-progress-percent" style="font-weight:700;color:#38bdf8;">--%</span>
+        </div>
+        <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;">
+          <div id="goal-progress-bar" style="width:0%;height:100%;background:linear-gradient(90deg, #38bdf8, #818cf8);border-radius:6px;transition:width 0.6s ease;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BMI & Body Composition -->
+    <div class="card" style="padding:1.25rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">BMI & Category</span>
+        <button type="button" onclick="promptSetHeight()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.75rem;font-weight:600;" title="Edit Height">📏 <span id="member-height-display">175</span>cm</button>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:0.5rem;margin-top:0.35rem;">
+        <span id="bmi-value-display" style="font-size:1.85rem;font-weight:800;color:#10b981;">--</span>
+        <span id="bmi-badge-display" class="badge badge-normal" style="font-size:0.7rem;">Normal</span>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.35rem;" id="bmi-desc-display">
+        Healthy weight range
+      </div>
+    </div>
+
+    <!-- Attendance & Consistency Streak -->
+    <div class="card" style="padding:1.25rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Gym Check-Ins</span>
+        <span style="font-size:1.1rem;">🔥</span>
+      </div>
+      <div style="font-size:1.85rem;font-weight:800;margin-top:0.35rem;color:#f59e0b;">
+        <%= attendanceStats.count %> <span style="font-size:1rem;font-weight:600;color:var(--text-muted);">Visits</span>
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">
+        <strong><%= attendanceStats.thisMonthCount %></strong> visits this month · <strong><%= attendanceStats.rate %>%</strong> target rate
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: BODY CIRCUMFERENCE & MEASUREMENTS -->
+  <div class="detail-card" style="margin-top:1.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;">
+      <div>
+        <h3 class="detail-card-title" style="margin:0;">📐 Body Circumference Measurements</h3>
+        <p class="text-muted" style="font-size:0.82rem;margin:0.2rem 0 0;">Track muscular hypertrophy and waist reduction alongside body weight.</p>
+      </div>
+      <span class="badge badge-pro" style="font-size:0.72rem;">Body Composition</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;">
+      <!-- Waist -->
+      <div class="card" style="padding:1rem;background:rgba(0,0,0,0.2);">
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Waist Circumference</div>
+        <div style="font-size:1.5rem;font-weight:800;margin-top:0.25rem;color:#38bdf8;">
+          <%= weightStats.currentWaist ? weightStats.currentWaist + ' cm' : 'Not recorded' %>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">
+          <% if (weightStats.startingWaist) { %>
+            Baseline: <%= weightStats.startingWaist %> cm 
+            (<span class="<%= weightStats.waistChange <= 0 ? 'stat-change-good' : 'stat-change-bad' %>">
+              <%= weightStats.waistChange > 0 ? '+' : '' %><%= weightStats.waistChange %> cm
+            </span>)
+          <% } else { %>
+            Log your waist size to track fat loss
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Chest -->
+      <div class="card" style="padding:1rem;background:rgba(0,0,0,0.2);">
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Chest Circumference</div>
+        <div style="font-size:1.5rem;font-weight:800;margin-top:0.25rem;color:#818cf8;">
+          <%= weightStats.currentChest ? weightStats.currentChest + ' cm' : 'Not recorded' %>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">
+          <% if (weightStats.startingChest) { %>
+            Baseline: <%= weightStats.startingChest %> cm 
+            (<span class="<%= weightStats.chestChange >= 0 ? 'stat-change-good' : 'stat-change-bad' %>">
+              <%= weightStats.chestChange > 0 ? '+' : '' %><%= weightStats.chestChange %> cm
+            </span>)
+          <% } else { %>
+            Log chest circumference to track upper body
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Arms / Biceps -->
+      <div class="card" style="padding:1rem;background:rgba(0,0,0,0.2);">
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Arms / Biceps</div>
+        <div style="font-size:1.5rem;font-weight:800;margin-top:0.25rem;color:#f472b6;">
+          <%= weightStats.currentArms ? weightStats.currentArms + ' cm' : 'Not recorded' %>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">
+          <% if (weightStats.startingArms) { %>
+            Baseline: <%= weightStats.startingArms %> cm 
+            (<span class="<%= weightStats.armsChange >= 0 ? 'stat-change-good' : 'stat-change-bad' %>">
+              <%= weightStats.armsChange > 0 ? '+' : '' %><%= weightStats.armsChange %> cm
+            </span>)
+          <% } else { %>
+            Log arm size to track muscle hypertrophy
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: PROGRESS CHART -->
+  <div class="detail-card" style="margin-top:1.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+      <div>
+        <h3 class="detail-card-title" style="margin:0;">📈 Weight Progression & Trend Curve</h3>
+        <p class="text-muted" style="font-size:0.82rem;margin:0.2rem 0 0;">Visual timeline of your body transformation journey.</p>
+      </div>
+      <span class="text-muted" style="font-size:0.8rem;"><%= weightStats.weights.length %> entries recorded</span>
+    </div>
+
+    <% if (weightStats.weights.length < 2) { %>
+      <div class="empty-state" style="padding:2.5rem 1rem;">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem;">📊</div>
+        <p style="font-weight:600;">Need At Least 2 Logs for Trend Curve</p>
+        <p class="text-muted" style="font-size:0.85rem;margin-top:0.25rem;">
+          <%= weightStats.weights.length === 1 ? 'You have 1 log recorded. Add another log below to generate your transformation chart!' : 'Start logging your weight and body measurements below to visualize your progress curve.' %>
+        </p>
+      </div>
+    <% } else { %>
+      <%
+        const weightsArr = weightStats.weights;
+        const minW = Math.floor(Math.min(...weightsArr.map(w => w.weight)) - 1);
+        const maxW = Math.ceil(Math.max(...weightsArr.map(w => w.weight)) + 1);
+        const range = maxW - minW || 1;
+        const width = 800;
+        const height = 240;
+        const padding = 40;
+        const stepX = (width - padding * 2) / (weightsArr.length - 1);
+
+        const points = weightsArr.map((w, i) => {
+          const x = padding + i * stepX;
+          const y = height - padding - ((w.weight - minW) / range) * (height - padding * 2);
+          return { x, y, weight: w.weight, date: new Date(w.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short' }) };
+        });
+        const pathD = points.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(' ');
+        const areaD = `${pathD} L ${points[points.length-1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
+      %>
+
+      <div style="overflow-x:auto;padding-bottom:0.5rem;">
+        <svg viewBox="0 0 <%= width %> <%= height %>" style="width:100%;height:auto;max-height:280px;display:block;">
+          <defs>
+            <linearGradient id="chartGradProgress" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--accent, #10b981)" stop-opacity="0.35" />
+              <stop offset="100%" stop-color="var(--accent, #10b981)" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+
+          <!-- Grid lines -->
+          <line x1="<%= padding %>" y1="<%= padding %>" x2="<%= width - padding %>" y2="<%= padding %>" stroke="rgba(255,255,255,0.07)" stroke-dasharray="4" />
+          <line x1="<%= padding %>" y1="<%= height/2 %>" x2="<%= width - padding %>" y2="<%= height/2 %>" stroke="rgba(255,255,255,0.07)" stroke-dasharray="4" />
+          <line x1="<%= padding %>" y1="<%= height - padding %>" x2="<%= width - padding %>" y2="<%= height - padding %>" stroke="rgba(255,255,255,0.15)" />
+
+          <!-- Y-Axis labels -->
+          <text x="8" y="<%= padding + 4 %>" fill="#94a3b8" font-size="11" font-weight="600"><%= maxW %>kg</text>
+          <text x="8" y="<%= height/2 + 4 %>" fill="#94a3b8" font-size="11"><%= ((maxW + minW)/2).toFixed(1) %>kg</text>
+          <text x="8" y="<%= height - padding + 4 %>" fill="#94a3b8" font-size="11" font-weight="600"><%= minW %>kg</text>
+
+          <!-- Area fill -->
+          <path d="<%= areaD %>" fill="url(#chartGradProgress)" />
+
+          <!-- Main trend line -->
+          <path d="<%= pathD %>" fill="none" stroke="var(--accent, #10b981)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+
+          <!-- Data points & labels -->
+          <% points.forEach((p) => { %>
+            <circle cx="<%= p.x %>" cy="<%= p.y %>" r="5.5" fill="var(--accent, #10b981)" stroke="#090d14" stroke-width="2.5" />
+            <text x="<%= p.x %>" y="<%= p.y - 10 %>" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="700">
+              <%= p.weight %>
+            </text>
+            <text x="<%= p.x %>" y="<%= height - 14 %>" text-anchor="middle" fill="#94a3b8" font-size="10">
+              <%= p.date %>
+            </text>
+          <% }) %>
+        </svg>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- ROW 4: LOG ENTRY FORM & LIFESTYLE / ATTENDANCE CONSISTENCY GRID -->
+  <div style="display:grid;grid-template-columns:1.1fr 1.3fr;gap:1.5rem;margin-top:1.5rem;align-items:start;">
+
+    <!-- Left Column: Log Form & Water Tracker -->
+    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+      <!-- Log Form -->
+      <div class="detail-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <h3 class="detail-card-title" style="margin:0;">✍️ Record Progress Entry</h3>
+          <span class="badge badge-normal" style="font-size:0.7rem;">New Log</span>
+        </div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:1rem;">Add your latest weight, body measurements, and fitness notes.</p>
+
+        <form action="/member/weight" method="POST">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group" style="margin-bottom:0.75rem;">
+              <label for="weight">Weight (kg) *</label>
+              <input type="number" step="0.1" min="20" max="350" id="weight" name="weight" required
+                     placeholder="e.g. 72.5" class="kiosk-input" style="width:100%;" />
+            </div>
+            <div class="form-group" style="margin-bottom:0.75rem;">
+              <label for="date">Date</label>
+              <input type="date" id="date" name="date" value="<%= new Date().toISOString().split('T')[0] %>"
+                     class="kiosk-input" style="width:100%;" />
+            </div>
+          </div>
+
+          <!-- Circumference fields -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-top:0.25rem;">
+            <div class="form-group" style="margin-bottom:0.75rem;">
+              <label for="waist">Waist (cm)</label>
+              <input type="number" step="0.5" min="30" max="200" id="waist" name="waist"
+                     placeholder="e.g. 82" class="kiosk-input" style="width:100%;" />
+            </div>
+            <div class="form-group" style="margin-bottom:0.75rem;">
+              <label for="chest">Chest (cm)</label>
+              <input type="number" step="0.5" min="30" max="200" id="chest" name="chest"
+                     placeholder="e.g. 98" class="kiosk-input" style="width:100%;" />
+            </div>
+            <div class="form-group" style="margin-bottom:0.75rem;">
+              <label for="arms">Arms (cm)</label>
+              <input type="number" step="0.5" min="15" max="80" id="arms" name="arms"
+                     placeholder="e.g. 36" class="kiosk-input" style="width:100%;" />
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label for="notes">Progress Notes & Reflection</label>
+            <input type="text" id="notes" name="notes" placeholder="e.g. Feeling strong, hit personal record on squats"
+                   class="kiosk-input" style="width:100%;" />
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;">
+            + Save Progress Entry
+          </button>
+        </form>
+      </div>
+
+      <!-- Daily Hydration Tracker -->
+      <div class="detail-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+          <h3 class="detail-card-title" style="margin:0;">💧 Daily Hydration Target (3L)</h3>
+          <span id="water-count-text" style="font-size:0.8rem;font-weight:700;color:#38bdf8;">0 / 8 Glasses (0.0L)</span>
+        </div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:0.75rem;">Click glasses as you drink water today to hit your optimal recovery target.</p>
+        
+        <div id="water-glasses-row" style="display:grid;grid-template-columns:repeat(8, 1fr);gap:0.4rem;text-align:center;">
+          <% for (let i = 1; i <= 8; i++) { %>
+            <button type="button" class="water-glass-btn" data-glass="<%= i %>" onclick="toggleWaterGlass(Number(this.dataset.glass))" id="glass-<%= i %>"
+                    style="padding:10px 4px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(56,189,248,0.25);cursor:pointer;transition:all 0.2s;">
+              <div style="font-size:1.25rem;">🥤</div>
+              <div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;"><%= i * 375 %>ml</div>
+            </button>
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Attendance Heatmap, Workout & Nutrition Snapshots -->
+    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+      <!-- Attendance Day-of-Week Frequency -->
+      <div class="detail-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <h3 class="detail-card-title" style="margin:0;">📅 Workout Frequency by Day</h3>
+          <span class="badge badge-normal" style="font-size:0.7rem;">Attendance Pattern</span>
+        </div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:1rem;">Your gym check-in consistency across days of the week.</p>
+
+        <%
+          const freq = attendanceStats.dayFrequency || { Mon:0, Tue:0, Wed:0, Thu:0, Fri:0, Sat:0, Sun:0 };
+          const maxFreq = Math.max(1, ...Object.values(freq));
+          const dayList = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        %>
+
+        <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:0.5rem;align-items:end;height:120px;padding-bottom:1.5rem;border-bottom:1px solid var(--border);">
+          <% dayList.forEach(day => { %>
+            <% const val = freq[day] || 0; %>
+            <% const heightPercent = Math.max(12, Math.round((val / maxFreq) * 100)); %>
+            <div style="display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+              <span style="font-size:0.7rem;font-weight:700;color:var(--text);margin-bottom:4px;"><%= val %></span>
+              <div class="freq-bar <%= val > 0 ? 'freq-bar-active' : 'freq-bar-inactive' %>" data-height="<%= heightPercent %>"></div>
+              <span style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;font-weight:600;"><%= day %></span>
+            </div>
+          <% }) %>
+        </div>
+        <div style="margin-top:0.75rem;display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-muted);">
+          <span>Total Recorded Visits: <strong><%= attendanceStats.count %></strong></span>
+          <a href="/member/attendance" style="color:var(--accent);font-weight:600;">View Check-In History →</a>
+        </div>
+      </div>
+
+      <!-- Assigned Workout & Nutrition Overview -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+
+        <!-- Workout Routine Snapshot -->
+        <div class="card" style="padding:1.15rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Workout Plan</span>
+            <span style="font-size:1.1rem;">🏋️</span>
+          </div>
+          <% if (workoutPlan) { %>
+            <div style="font-size:1.1rem;font-weight:700;margin-top:0.35rem;">
+              <%= workoutPlan.schedule || 'Assigned Plan' %>
+            </div>
+            <p class="text-muted" style="font-size:0.78rem;margin:0.25rem 0 0.75rem;">
+              <%= workoutPlan.exercises ? workoutPlan.exercises.length : 0 %> exercises prescribed
+            </p>
+            <a href="/member/workout" class="btn btn-sm btn-outline" style="width:100%;text-align:center;">View Routine →</a>
+          <% } else { %>
+            <div style="font-size:0.95rem;font-weight:600;margin-top:0.35rem;color:var(--text-muted);">No Routine Assigned</div>
+            <p class="text-muted" style="font-size:0.78rem;margin:0.25rem 0 0.75rem;">Ask your trainer to design your workout split.</p>
+            <a href="/member/workout" class="btn btn-sm btn-outline" style="width:100%;text-align:center;">Workout Page</a>
+          <% } %>
+        </div>
+
+        <!-- Nutrition Snapshot -->
+        <div class="card" style="padding:1.15rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Diet & Nutrition</span>
+            <span style="font-size:1.1rem;">🥗</span>
+          </div>
+          <% if (dietPlan) { %>
+            <div style="font-size:1.1rem;font-weight:700;margin-top:0.35rem;">
+              <%= dietPlan.dietPreference || member.dietPreference || 'Balanced' %>
+            </div>
+            <p class="text-muted" style="font-size:0.78rem;margin:0.25rem 0 0.75rem;">
+              <%= dietPlan.meals ? dietPlan.meals.length : 0 %> meals prescribed / day
+            </p>
+            <a href="/member/diet" class="btn btn-sm btn-outline" style="width:100%;text-align:center;">View Diet Plan →</a>
+          <% } else { %>
+            <div style="font-size:0.95rem;font-weight:600;margin-top:0.35rem;color:var(--text-muted);"><%= member.dietPreference || 'Not Specified' %></div>
+            <p class="text-muted" style="font-size:0.78rem;margin:0.25rem 0 0.75rem;">Trainer diet plan not yet assigned.</p>
+            <a href="/member/diet" class="btn btn-sm btn-outline" style="width:100%;text-align:center;">Diet Page</a>
+          <% } %>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ROW 5: MILESTONE ACHIEVEMENTS & BADGES -->
+  <div class="detail-card" style="margin-top:1.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;">
+      <div>
+        <h3 class="detail-card-title" style="margin:0;">🏆 Fitness Milestones & Achievements</h3>
+        <p class="text-muted" style="font-size:0.82rem;margin:0.2rem 0 0;">Unlock performance badges as you maintain consistency and progress.</p>
+      </div>
+      <span class="badge badge-normal" style="font-size:0.72rem;">Gamified Milestones</span>
+    </div>
+
+    <%
+      const hasFirstLog = weightStats.weights.length > 0;
+      const hasThreeLogs = weightStats.weights.length >= 3;
+      const hasMeasurements = weightStats.currentWaist != null || weightStats.currentChest != null || weightStats.currentArms != null;
+      const hasThreeVisits = attendanceStats.count >= 3;
+      const hasTenVisits = attendanceStats.count >= 10;
+      const hasWorkout = !!workoutPlan;
+      const hasDiet = !!dietPlan;
+    %>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;">
+      <!-- Badge 1 -->
+      <div class="card <%= hasFirstLog ? 'badge-card-unlocked' : 'badge-card-locked' %>">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;"><%= hasFirstLog ? '🎯' : '🔒' %></span>
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;">Journey Begun</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);">First measurement logged</div>
+          </div>
+        </div>
+        <span class="badge <%= hasFirstLog ? 'badge-normal' : 'badge-disabled' %>" style="margin-top:0.65rem;display:inline-block;font-size:0.65rem;">
+          <%= hasFirstLog ? '✓ UNLOCKED' : 'IN PROGRESS' %>
+        </span>
+      </div>
+
+      <!-- Badge 2 -->
+      <div class="card <%= hasThreeVisits ? 'badge-card-unlocked' : 'badge-card-locked' %>">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;"><%= hasThreeVisits ? '⚡' : '🔒' %></span>
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;">Consistency Club</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);">3+ Gym Visits (<%= attendanceStats.count %>/3)</div>
+          </div>
+        </div>
+        <span class="badge <%= hasThreeVisits ? 'badge-normal' : 'badge-disabled' %>" style="margin-top:0.65rem;display:inline-block;font-size:0.65rem;">
+          <%= hasThreeVisits ? '✓ UNLOCKED' : 'IN PROGRESS' %>
+        </span>
+      </div>
+
+      <!-- Badge 3 -->
+      <div class="card <%= hasTenVisits ? 'badge-card-unlocked' : 'badge-card-locked' %>">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;"><%= hasTenVisits ? '🔥' : '🔒' %></span>
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;">Iron Warrior</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);">10+ Gym Visits (<%= attendanceStats.count %>/10)</div>
+          </div>
+        </div>
+        <span class="badge <%= hasTenVisits ? 'badge-normal' : 'badge-disabled' %>" style="margin-top:0.65rem;display:inline-block;font-size:0.65rem;">
+          <%= hasTenVisits ? '✓ UNLOCKED' : 'IN PROGRESS' %>
+        </span>
+      </div>
+
+      <!-- Badge 4 -->
+      <div class="card <%= hasMeasurements ? 'badge-card-unlocked' : 'badge-card-locked' %>">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;"><%= hasMeasurements ? '📐' : '🔒' %></span>
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;">Body Sculptor</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);">Body circumferences logged</div>
+          </div>
+        </div>
+        <span class="badge <%= hasMeasurements ? 'badge-normal' : 'badge-disabled' %>" style="margin-top:0.65rem;display:inline-block;font-size:0.65rem;">
+          <%= hasMeasurements ? '✓ UNLOCKED' : 'IN PROGRESS' %>
+        </span>
+      </div>
+
+      <!-- Badge 5 -->
+      <div class="card <%= hasWorkout ? 'badge-card-unlocked' : 'badge-card-locked' %>">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;"><%= hasWorkout ? '📋' : '🔒' %></span>
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;">Routine Aligned</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);">Trainer workout active</div>
+          </div>
+        </div>
+        <span class="badge <%= hasWorkout ? 'badge-normal' : 'badge-disabled' %>" style="margin-top:0.65rem;display:inline-block;font-size:0.65rem;">
+          <%= hasWorkout ? '✓ UNLOCKED' : 'IN PROGRESS' %>
+        </span>
+      </div>
+
+      <!-- Badge 6 -->
+      <div class="card <%= hasDiet ? 'badge-card-unlocked' : 'badge-card-locked' %>">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;"><%= hasDiet ? '🥗' : '🔒' %></span>
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;">Clean Nutrition</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);">Trainer diet plan active</div>
+          </div>
+        </div>
+        <span class="badge <%= hasDiet ? 'badge-normal' : 'badge-disabled' %>" style="margin-top:0.65rem;display:inline-block;font-size:0.65rem;">
+          <%= hasDiet ? '✓ UNLOCKED' : 'IN PROGRESS' %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 6: COMPLETE TRANSFORMATION LOG HISTORY -->
+  <div style="margin-top:2rem;">
+    <div class="admin-header-row" style="margin-bottom:1rem;">
+      <h2 style="font-size:1.2rem;font-weight:700;">📋 Comprehensive Transformation Log</h2>
+      <span class="text-muted" style="font-size:0.85rem;"><%= weightStats.weights.length %> entries recorded</span>
+    </div>
+
+    <% if (weightStats.weights.length === 0) { %>
+      <div class="empty-state">
+        <p>No transformation logs recorded yet. Record your first progress measurement above!</p>
+      </div>
+    <% } else { %>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Weight</th>
+              <th>Weight Delta</th>
+              <th>Waist</th>
+              <th>Chest</th>
+              <th>Arms</th>
+              <th>Notes / Reflections</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% [...weightStats.weights].reverse().forEach((item, index) => { %>
+              <% const diff = weightStats.startingWeight ? Number((item.weight - weightStats.startingWeight).toFixed(1)) : 0; %>
+              <tr>
+                <td class="text-muted"><%= weightStats.weights.length - index %></td>
+                <td><strong><%= new Date(item.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) %></strong></td>
+                <td><span style="font-size:1rem;font-weight:700;color:var(--accent);"><%= item.weight %> kg</span></td>
+                <td>
+                  <span class="<%= diff <= 0 ? 'stat-change-good' : 'stat-change-bad' %>">
+                    <%= diff > 0 ? '+' : '' %><%= diff %> kg
+                  </span>
+                </td>
+                <td><%= item.waist ? item.waist + ' cm' : '—' %></td>
+                <td><%= item.chest ? item.chest + ' cm' : '—' %></td>
+                <td><%= item.arms ? item.arms + ' cm' : '—' %></td>
+                <td class="text-muted"><%= item.notes || '—' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+</main>
+
+<script>
+(function() {
+  const currentWeight = Number('<%= weightStats.currentWeight || 70 %>');
+  const startingWeight = Number('<%= weightStats.startingWeight || 70 %>');
+
+  // Set frequency chart bar heights
+  document.querySelectorAll('.freq-bar').forEach(function(bar) {
+    if (bar.dataset.height) {
+      bar.style.height = bar.dataset.height + '%';
+    }
+  });
+
+  // 1. Target Goal Calculator & Local Storage
+  function loadTargetWeight() {
+    let target = localStorage.getItem('fitzone_target_weight');
+    if (!target) {
+      target = startingWeight > 75 ? (startingWeight - 5).toFixed(1) : (startingWeight + 3).toFixed(1);
+    }
+    target = parseFloat(target);
+    document.getElementById('target-weight-display').textContent = target.toFixed(1);
+
+    // Compute progress %
+    let percent = 0;
+    if (startingWeight !== target) {
+      const totalToChange = Math.abs(startingWeight - target);
+      const changedSoFar = Math.abs(currentWeight - startingWeight);
+      percent = Math.min(100, Math.round((changedSoFar / totalToChange) * 100));
+    } else {
+      percent = 100;
+    }
+
+    document.getElementById('goal-progress-percent').textContent = percent + '%';
+    document.getElementById('goal-progress-bar').style.width = percent + '%';
+  }
+
+  window.promptSetTargetWeight = function() {
+    const currentGoal = document.getElementById('target-weight-display').textContent;
+    const val = prompt('Enter your target goal weight in kg:', currentGoal);
+    if (val && !isNaN(parseFloat(val)) && parseFloat(val) > 20) {
+      localStorage.setItem('fitzone_target_weight', parseFloat(val).toFixed(1));
+      loadTargetWeight();
+    }
+  };
+
+  // 2. BMI Calculator & Height Storage
+  function loadHeightAndBMI() {
+    let height = localStorage.getItem('fitzone_member_height');
+    if (!height) height = '175';
+    height = parseFloat(height);
+    document.getElementById('member-height-display').textContent = height;
+
+    if (currentWeight && height) {
+      const hM = height / 100;
+      const bmi = (currentWeight / (hM * hM)).toFixed(1);
+      const bmiEl = document.getElementById('bmi-value-display');
+      const badgeEl = document.getElementById('bmi-badge-display');
+      const descEl = document.getElementById('bmi-desc-display');
+
+      bmiEl.textContent = bmi;
+
+      if (bmi < 18.5) {
+        badgeEl.textContent = 'Underweight';
+        badgeEl.className = 'badge badge-pro';
+        descEl.textContent = 'Below normal weight range';
+      } else if (bmi <= 24.9) {
+        badgeEl.textContent = 'Healthy';
+        badgeEl.className = 'badge badge-normal';
+        descEl.textContent = 'Optimal athletic fitness range';
+      } else if (bmi <= 29.9) {
+        badgeEl.textContent = 'Overweight';
+        badgeEl.className = 'badge badge-plus';
+        descEl.textContent = 'Above average weight range';
+      } else {
+        badgeEl.textContent = 'High BMI';
+        badgeEl.className = 'badge badge-pro';
+        descEl.textContent = 'Recommended to consult trainer';
+      }
+    }
+  }
+
+  window.promptSetHeight = function() {
+    const curr = document.getElementById('member-height-display').textContent;
+    const val = prompt('Enter your height in cm:', curr);
+    if (val && !isNaN(parseFloat(val)) && parseFloat(val) > 80 && parseFloat(val) < 250) {
+      localStorage.setItem('fitzone_member_height', parseFloat(val));
+      loadHeightAndBMI();
+    }
+  };
+
+  // 3. Hydration Tracker in LocalStorage (Daily Reset)
+  function getTodayKey() {
+    return 'fitzone_water_' + new Date().toISOString().split('T')[0];
+  }
+
+  function renderWater() {
+    const key = getTodayKey();
+    let count = parseInt(localStorage.getItem(key) || '0', 10);
+    if (isNaN(count)) count = 0;
+
+    const textEl = document.getElementById('water-count-text');
+    if (textEl) {
+      textEl.textContent = count + ' / 8 Glasses (' + (count * 0.375).toFixed(1) + 'L)';
+    }
+
+    for (let i = 1; i <= 8; i++) {
+      const btn = document.getElementById('glass-' + i);
+      if (!btn) continue;
+      if (i <= count) {
+        btn.style.background = 'rgba(56, 189, 248, 0.25)';
+        btn.style.borderColor = '#38bdf8';
+        btn.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.35)';
+      } else {
+        btn.style.background = 'rgba(255, 255, 255, 0.06)';
+        btn.style.borderColor = 'rgba(56, 189, 248, 0.25)';
+        btn.style.boxShadow = 'none';
+      }
+    }
+  }
+
+  window.toggleWaterGlass = function(glassIndex) {
+    const key = getTodayKey();
+    let count = parseInt(localStorage.getItem(key) || '0', 10);
+    if (isNaN(count)) count = 0;
+
+    if (glassIndex === count) {
+      count = glassIndex - 1;
+    } else {
+      count = glassIndex;
+    }
+    localStorage.setItem(key, count);
+    renderWater();
+  };
+
+  // Initialize
+  loadTargetWeight();
+  loadHeightAndBMI();
+  renderWater();
+})();
+</script>
+
+<%- include('../partials/footer') %>

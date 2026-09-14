@@ -1,0 +1,191 @@
+<%- include('../partials/header') %>
+
+<main class="dashboard-page">
+
+  <!-- Header -->
+  <div class="admin-header-row">
+    <div>
+      <div class="dashboard-eyebrow">Trainer / <%= member.name %></div>
+      <h1>Member Progress & Logs</h1>
+      <p class="text-muted">Viewing progress history and attendance records for <strong><%= member.name %></strong></p>
+    </div>
+    <div style="display:flex;gap:0.75rem;">
+      <a href="/trainer/dashboard" class="btn btn-secondary">← Trainer Dashboard</a>
+      <a href="/trainer/members/<%= member._id %>/workout" class="btn btn-outline">📋 Workout</a>
+      <a href="/trainer/members/<%= member._id %>/diet" class="btn btn-outline">🥗 Diet</a>
+    </div>
+  </div>
+
+  <!-- Summary Stats -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:1rem;margin-top:1.5rem;">
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Starting Weight</div>
+      <div style="font-size:1.75rem;font-weight:800;margin-top:0.35rem;color:var(--text);">
+        <%= weightStats.startingWeight ? weightStats.startingWeight + ' kg' : '—' %>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Initial recorded weight</div>
+    </div>
+
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Current Weight</div>
+      <div style="font-size:1.75rem;font-weight:800;margin-top:0.35rem;color:var(--accent);">
+        <%= weightStats.currentWeight ? weightStats.currentWeight + ' kg' : '—' %>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Latest logged measurement</div>
+    </div>
+
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Weight Delta</div>
+      <div style="font-size:1.75rem;font-weight:800;margin-top:0.35rem;color:<%= weightStats.weightChange <= 0 ? '#34d399' : '#f87171' %>;">
+        <%= weightStats.startingWeight ? (weightStats.weightChange > 0 ? '+' : '') + weightStats.weightChange + ' kg' : '—' %>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Net change from baseline</div>
+    </div>
+
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Gym Check-Ins</div>
+      <div style="font-size:1.75rem;font-weight:800;margin-top:0.35rem;color:#60a5fa;">
+        <%= attendanceCount %> visits
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Total attendance recorded</div>
+    </div>
+  </div>
+
+  <!-- Weight Chart Section -->
+  <div class="detail-card" style="margin-top:2rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h3 class="detail-card-title" style="margin:0;">📈 Weight Progression Line</h3>
+      <span class="text-muted" style="font-size:0.8rem;"><%= weightStats.weights.length %> logs recorded</span>
+    </div>
+
+    <% if (weightStats.weights.length < 2) { %>
+      <div class="empty-state" style="padding:2rem;">
+        <p>Member has not recorded enough weight logs yet to render a trend chart.</p>
+      </div>
+    <% } else { %>
+      <%
+        const weightsArr = weightStats.weights;
+        const minW = Math.floor(Math.min(...weightsArr.map(w => w.weight)) - 1);
+        const maxW = Math.ceil(Math.max(...weightsArr.map(w => w.weight)) + 1);
+        const range = maxW - minW || 1;
+        const width = 600;
+        const height = 220;
+        const padding = 35;
+        const stepX = (width - padding * 2) / (weightsArr.length - 1);
+
+        const points = weightsArr.map((w, i) => {
+          const x = padding + i * stepX;
+          const y = height - padding - ((w.weight - minW) / range) * (height - padding * 2);
+          return { x, y, weight: w.weight, date: new Date(w.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short' }) };
+        });
+        const pathD = points.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(' ');
+        const areaD = `${pathD} L ${points[points.length-1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
+      %>
+
+      <div style="overflow-x:auto;">
+        <svg viewBox="0 0 <%= width %> <%= height %>" style="width:100%;height:auto;max-height:240px;display:block;">
+          <defs>
+            <linearGradient id="trainerChartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f97316" stop-opacity="0.35" />
+              <stop offset="100%" stop-color="#f97316" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+
+          <line x1="<%= padding %>" y1="<%= padding %>" x2="<%= width - padding %>" y2="<%= padding %>" stroke="rgba(255,255,255,0.07)" stroke-dasharray="4" />
+          <line x1="<%= padding %>" y1="<%= height/2 %>" x2="<%= width - padding %>" y2="<%= height/2 %>" stroke="rgba(255,255,255,0.07)" stroke-dasharray="4" />
+          <line x1="<%= padding %>" y1="<%= height - padding %>" x2="<%= width - padding %>" y2="<%= height - padding %>" stroke="rgba(255,255,255,0.15)" />
+
+          <text x="5" y="<%= padding + 4 %>" fill="#94a3b8" font-size="11" font-weight="600"><%= maxW %>kg</text>
+          <text x="5" y="<%= height/2 + 4 %>" fill="#94a3b8" font-size="11"><%= ((maxW + minW)/2).toFixed(1) %>kg</text>
+          <text x="5" y="<%= height - padding + 4 %>" fill="#94a3b8" font-size="11" font-weight="600"><%= minW %>kg</text>
+
+          <path d="<%= areaD %>" fill="url(#trainerChartGrad)" />
+          <path d="<%= pathD %>" fill="none" stroke="#f97316" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+          <% points.forEach(p => { %>
+            <circle cx="<%= p.x %>" cy="<%= p.y %>" r="5" fill="#f97316" stroke="#0f172a" stroke-width="2" />
+            <text x="<%= p.x %>" y="<%= p.y - 10 %>" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="700"><%= p.weight %></text>
+            <text x="<%= p.x %>" y="<%= height - 12 %>" text-anchor="middle" fill="#64748b" font-size="10"><%= p.date %></text>
+          <% }) %>
+        </svg>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Tables: Weight Logs & Attendance -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem;">
+
+    <!-- Weight Logs Table -->
+    <div class="detail-card">
+      <h3 class="detail-card-title">⚖️ Weight Logs</h3>
+      <% if (weightStats.weights.length === 0) { %>
+        <p class="text-muted" style="margin-top:0.75rem;">No weight entries recorded yet.</p>
+      <% } else { %>
+        <div class="data-table-wrap" style="margin-top:0.75rem;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Weight</th>
+                <th>Change</th>
+                <th>Waist</th>
+                <th>Chest</th>
+                <th>Arms</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% [...weightStats.weights].reverse().forEach(w => { %>
+                <% const diff = Number((w.weight - weightStats.startingWeight).toFixed(1)); %>
+                <tr>
+                  <td><%= new Date(w.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short' }) %></td>
+                  <td><strong><%= w.weight %> kg</strong></td>
+                  <td style="color:<%= diff <= 0 ? '#34d399' : '#f87171' %>;">
+                    <%= diff > 0 ? '+' : '' %><%= diff %> kg
+                  </td>
+                  <td><%= w.waist ? w.waist + ' cm' : '—' %></td>
+                  <td><%= w.chest ? w.chest + ' cm' : '—' %></td>
+                  <td><%= w.arms ? w.arms + ' cm' : '—' %></td>
+                  <td class="text-muted"><%= w.notes || '—' %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Attendance History -->
+    <div class="detail-card">
+      <h3 class="detail-card-title">📅 Check-In History</h3>
+      <% if (attendanceHistory.length === 0) { %>
+        <p class="text-muted" style="margin-top:0.75rem;">No attendance logged yet.</p>
+      <% } else { %>
+        <div class="data-table-wrap" style="margin-top:0.75rem;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Method</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% attendanceHistory.slice(0, 10).forEach(att => { %>
+                <tr>
+                  <td><%= new Date(att.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short' }) %></td>
+                  <td><strong><%= att.entryTime || '—' %></strong></td>
+                  <td><span class="badge badge-normal" style="font-size:0.72rem;"><%= att.method || 'Manual' %></span></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

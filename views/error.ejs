@@ -1,0 +1,10 @@
+<%- include('partials/header') %>
+
+<div class="error-page">
+  <div class="error-code"><%= statusCode %></div>
+  <h2><%= statusCode === 404 ? 'Page Not Found' : 'Something Went Wrong' %></h2>
+  <p><%= message %></p>
+  <a href="/" class="btn btn-primary">← Back to Home</a>
+</div>
+
+<%- include('partials/footer') %>

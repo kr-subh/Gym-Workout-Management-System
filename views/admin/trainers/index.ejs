@@ -1,0 +1,67 @@
+<%- include('../../partials/header') %>
+
+<main class="dashboard-page">
+  <div class="admin-header-row">
+    <div>
+      <div class="dashboard-eyebrow">Admin / Trainers</div>
+      <h1>Trainer Management</h1>
+      <p>Manage trainers, view their member load, and control access.</p>
+    </div>
+    <div class="header-actions">
+      <a href="/admin/dashboard" class="btn btn-secondary">← Dashboard</a>
+      <a href="/admin/trainers/new" class="btn btn-primary">+ Add Trainer</a>
+    </div>
+  </div>
+
+  <% if (successMsg) { %>
+    <div class="alert alert-success" style="margin-bottom:1rem;"><%= successMsg %></div>
+  <% } %>
+  <% if (errorMsg) { %>
+    <div class="alert alert-error" style="margin-bottom:1rem;"><%= errorMsg %></div>
+  <% } %>
+
+  <div class="data-table-wrap" style="margin-top:1.5rem;">
+    <% if (trainers.length === 0) { %>
+      <div class="empty-state">
+        <p>No trainers found. Add your first trainer using the button above.</p>
+      </div>
+    <% } else { %>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Members Assigned</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% trainers.forEach(t => { %>
+            <tr>
+              <td><strong><%= t.name %></strong></td>
+              <td class="text-muted"><%= t.email %></td>
+              <td class="text-muted"><%= t.phone || '—' %></td>
+              <td>
+                <span class="stat-mini-badge"><%= t.memberCount %> member<%= t.memberCount !== 1 ? 's' : '' %></span>
+              </td>
+              <td>
+                <div class="table-actions">
+                  <a href="/admin/trainers/<%= t._id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+                  <form action="/admin/trainers/<%= t._id %>/deactivate" method="POST" onsubmit="return confirm('Deactivate this trainer?');" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-warn-outline">Deactivate</button>
+                  </form>
+                  <form action="/admin/trainers/<%= t._id %>/delete" method="POST" onsubmit="return confirm('Delete this trainer and unassign all their members?');" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../../partials/footer') %>

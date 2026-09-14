@@ -1,0 +1,200 @@
+<%- include('../partials/header') %>
+
+<main class="dashboard-page">
+
+  <div class="dashboard-header">
+    <div class="dashboard-eyebrow">💰 Revenue & Payments</div>
+    <h1>Payment Management</h1>
+    <p>Track revenue, verify offline payments, and manage all payment transactions.</p>
+  </div>
+
+  <% if (successMsg) { %>
+    <div class="alert alert-success" style="margin-top:1.5rem;"><%= successMsg %></div>
+  <% } %>
+  <% if (errorMsg) { %>
+    <div class="alert alert-error" style="margin-top:1.5rem;"><%= errorMsg %></div>
+  <% } %>
+
+  <!-- Stats Cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;margin-top:1.5rem;">
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Total Revenue</div>
+      <div style="font-size:1.75rem;font-weight:800;margin-top:0.35rem;color:#22c55e;">
+        ₹<%= Number(stats.totalRevenue).toLocaleString('en-IN') %>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">From paid payments</div>
+    </div>
+
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Online Payments</div>
+      <div style="font-size:1.75rem;font-weight:800;margin-top:0.35rem;color:#6366f1;">
+        <%= stats.onlineCount %>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Via Razorpay</div>
+    </div>
+
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Offline Payments</div>
+      <div style="font-size:1.75rem;font-weight:800;margin-top:0.35rem;color:#f59e0b;">
+        <%= stats.offlineCount %>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Cash / Bank Transfer</div>
+    </div>
+
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Pending Verification</div>
+      <div style="font-size:1.75rem;font-weight:800;margin-top:0.35rem;color:<%= stats.pendingCount > 0 ? '#ef4444' : 'var(--text-muted)' %>;">
+        <%= stats.pendingCount %>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Offline payments awaiting approval</div>
+    </div>
+  </div>
+
+  <!-- Payments Table -->
+  <div style="margin-top:2rem;">
+    <div class="admin-header-row" style="margin-bottom:0.75rem;">
+      <h2 style="font-size:1.15rem;font-weight:700;">All Transactions</h2>
+    </div>
+
+    <% if (payments.length === 0) { %>
+      <div class="detail-card" style="text-align:center;padding:2rem;">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">📭</div>
+        <p style="font-weight:600;">No payments recorded yet.</p>
+        <p class="text-muted" style="font-size:0.85rem;">Payments will appear here once members start subscribing to plans.</p>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Plan</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Transaction ID</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% payments.forEach(payment => { %>
+              <tr>
+                <td>
+                  <div style="font-weight:600;"><%= payment.member ? payment.member.name : 'Unknown' %></div>
+                  <div class="text-muted" style="font-size:0.75rem;"><%= payment.member ? payment.member.email : '' %></div>
+                </td>
+                <td>
+                  <div><%= payment.membership ? payment.membership.name : 'Unknown' %></div>
+                  <% if (payment.membership && payment.membership.level) { %>
+                    <span class="badge badge-<%= payment.membership.level.toLowerCase().replace('+', '-plus') %>" style="font-size:0.65rem;">
+                      <%= payment.membership.level %>
+                    </span>
+                  <% } %>
+                </td>
+                <td style="font-weight:700;">₹<%= Number(payment.amount).toLocaleString('en-IN') %></td>
+                <td>
+                  <span style="padding:3px 8px;border-radius:6px;font-size:0.78rem;font-weight:600;
+                    background:<%= payment.method === 'online' ? 'rgba(99,102,241,0.1)' : 'rgba(245,158,11,0.1)' %>;
+                    color:<%= payment.method === 'online' ? '#6366f1' : '#f59e0b' %>;">
+                    <%= payment.method === 'online' ? '💳 Online' : '🏦 Offline' %>
+                  </span>
+                </td>
+                <td>
+                  <%
+                    let statusColor = '#f59e0b'; let statusBg = 'rgba(245,158,11,0.1)';
+                    if (payment.status === 'paid') { statusColor = '#22c55e'; statusBg = 'rgba(34,197,94,0.1)'; }
+                    else if (payment.status === 'failed' || payment.status === 'rejected') { statusColor = '#ef4444'; statusBg = 'rgba(239,68,68,0.1)'; }
+                  %>
+                  <span style="padding:3px 8px;border-radius:6px;font-size:0.78rem;font-weight:600;background:<%= statusBg %>;color:<%= statusColor %>;">
+                    <%= payment.status.charAt(0).toUpperCase() + payment.status.slice(1) %>
+                  </span>
+                  <% if (payment.status === 'rejected' && payment.rejectedReason) { %>
+                    <div class="text-muted" style="font-size:0.7rem;margin-top:2px;"><%= payment.rejectedReason %></div>
+                  <% } %>
+                </td>
+                <td>
+                  <div style="font-size:0.8rem;font-family:monospace;word-break:break-all;">
+                    <%= payment.transactionId || payment.razorpayPaymentId || '-' %>
+                  </div>
+                </td>
+                <td>
+                  <div style="font-size:0.82rem;">
+                    <%= new Date(payment.paymentDate || payment.createdAt).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) %>
+                  </div>
+                  <div class="text-muted" style="font-size:0.72rem;">
+                    <%= new Date(payment.paymentDate || payment.createdAt).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' }) %>
+                  </div>
+                </td>
+                <td>
+                  <% if (payment.status === 'pending' && payment.method === 'offline') { %>
+                    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                      <form action="/admin/payments/<%= payment._id %>/verify" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-primary" style="font-size:0.75rem;padding:4px 10px;">
+                          ✅ Verify
+                        </button>
+                      </form>
+                      <form action="/admin/payments/<%= payment._id %>/reject" method="POST" style="display:inline;" onsubmit="return confirm('Reject this payment?');">
+                        <input type="hidden" name="reason" value="Payment not received at reception" />
+                        <button type="submit" class="btn btn-sm" style="font-size:0.75rem;padding:4px 10px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);">
+                          ❌ Reject
+                        </button>
+                      </form>
+                    </div>
+                  <% } else if (payment.status === 'paid') { %>
+                    <span style="font-size:0.78rem;color:#22c55e;">✓ Completed</span>
+                    <% if (payment.verifiedBy) { %>
+                      <div class="text-muted" style="font-size:0.7rem;">
+                        by <%= payment.verifiedBy.name || 'Admin' %>
+                      </div>
+                    <% } %>
+                  <% } else { %>
+                    <span class="text-muted" style="font-size:0.78rem;">—</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+</main>
+
+<style>
+  .table-responsive {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  .admin-table th {
+    background: var(--surface);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border);
+  }
+  .admin-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .admin-table tr:last-child td {
+    border-bottom: none;
+  }
+  .admin-table tr:hover {
+    background: rgba(99,102,241,0.03);
+  }
+</style>
+
+<%- include('../partials/footer') %>

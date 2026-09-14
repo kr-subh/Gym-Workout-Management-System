@@ -1,0 +1,85 @@
+<%- include('../../partials/header') %>
+
+<main class="dashboard-page">
+  <div class="auth-card" style="max-width: 600px; margin: 0 auto;">
+    <div class="dashboard-eyebrow"><%= isEdit ? 'Admin / Edit' : 'Admin / New' %></div>
+    <h2 class="auth-title"><%= isEdit ? 'Edit Membership Plan' : 'Create Membership Plan' %></h2>
+    <p class="auth-subtitle">Configure the plan level, duration, pricing, and enabled features.</p>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <form action="<%= isEdit ? '/admin/memberships/' + plan._id + '/edit' : '/admin/memberships' %>" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="name">Plan Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          required
+          value="<%= plan.name || '' %>"
+          placeholder="e.g. Pro Athlete Membership"
+        />
+      </div>
+
+      <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label for="level">Membership Level</label>
+          <select id="level" name="level" required>
+            <option value="Normal" <%= plan.level === 'Normal' ? 'selected' : '' %>>Normal</option>
+            <option value="Pro" <%= plan.level === 'Pro' ? 'selected' : '' %>>Pro</option>
+            <option value="Pro+" <%= plan.level === 'Pro+' ? 'selected' : '' %>>Pro+</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="duration">Duration</label>
+          <input
+            type="text"
+            id="duration"
+            name="duration"
+            required
+            value="<%= plan.duration || '' %>"
+            placeholder="e.g. 1 Month, 3 Months, 1 Year"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Price (₹ INR)</label>
+        <input
+          type="number"
+          id="price"
+          name="price"
+          step="1"
+          min="0"
+          required
+          value="<%= plan.price !== undefined ? plan.price : '' %>"
+          placeholder="e.g. 1499"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="features">Included Features <span class="optional">(One per line or comma-separated)</span></label>
+        <textarea
+          id="features"
+          name="features"
+          rows="6"
+          style="background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; color: var(--text-primary); font-family: inherit; font-size: 0.9rem; resize: vertical; outline: none;"
+          placeholder="Basic profile&#10;QR gym entry&#10;Attendance&#10;Basic workout plan&#10;Weight logging"
+        ><%= Array.isArray(plan.features) ? plan.features.join('\n') : (plan.features || '') %></textarea>
+        <small style="color: var(--text-muted); font-size: 0.78rem;">Tip: Enter each feature on its own line.</small>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+        <a href="/admin/memberships" class="btn btn-secondary" style="flex: 1; text-align: center;">Cancel</a>
+        <button type="submit" class="btn btn-primary" style="flex: 2;">
+          <%= isEdit ? 'Update Plan' : 'Create Plan' %>
+        </button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('../../partials/footer') %>

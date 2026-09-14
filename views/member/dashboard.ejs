@@ -1,0 +1,434 @@
+<%- include('../partials/header') %>
+
+<main class="dashboard-page">
+
+  <!-- Welcome & Profile Header -->
+  <div class="dashboard-header">
+    <div class="dashboard-eyebrow">🏅 Member Portal</div>
+    <h1>Welcome back, <%= user.name %>!</h1>
+    <p>Track your workouts, nutrition, attendance, and fitness transformation in one place.</p>
+  </div>
+
+  <% if (successMsg) { %>
+    <div class="alert alert-success" style="margin-top:1.5rem;"><%= successMsg %></div>
+  <% } %>
+  <% if (errorMsg) { %>
+    <div class="alert alert-error" style="margin-top:1.5rem;"><%= errorMsg %></div>
+  <% } %>
+
+  <!-- Profile & Key Details Banner -->
+  <div class="detail-card" style="margin-top:1.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.25rem;">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <div class="member-avatar" style="width:56px;height:56px;font-size:1.5rem;">
+          <%= user.name ? user.name.charAt(0).toUpperCase() : 'M' %>
+        </div>
+        <div>
+          <h2 style="font-size:1.2rem;font-weight:700;margin:0;"><%= user.name %></h2>
+          <div class="text-muted" style="font-size:0.85rem;margin-top:0.25rem;">
+            <%= user.email %> <% if (user.phone) { %>· 📞 <%= user.phone %><% } %>
+          </div>
+          <div style="margin-top:0.4rem;display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+            <span class="diet-pref-badge diet-pref-<%= (user.dietPreference || 'vegetarian').toLowerCase().replace(' ','-') %>" style="font-size:0.75rem;padding:2px 8px;">
+              🥗 <%= user.dietPreference || 'Diet: Not Set' %>
+            </span>
+            <%
+              let statusBg = 'rgba(34,197,94,0.15)';
+              let statusColor = '#22c55e';
+              let statusBorder = 'rgba(34,197,94,0.3)';
+              let statusText = 'Active';
+
+              if (typeof membershipInfo !== 'undefined' && membershipInfo) {
+                if (membershipInfo.status === 'grace') {
+                  statusBg = 'rgba(245,158,11,0.15)';
+                  statusColor = '#f59e0b';
+                  statusBorder = 'rgba(245,158,11,0.3)';
+                  statusText = `Grace Period (${membershipInfo.graceDaysRemaining}d left)`;
+                } else if (membershipInfo.status === 'expired') {
+                  statusBg = 'rgba(239,68,68,0.15)';
+                  statusColor = '#ef4444';
+                  statusBorder = 'rgba(239,68,68,0.3)';
+                  statusText = 'Expired';
+                }
+              }
+            %>
+            <span class="badge" style="font-size:0.75rem;padding:2px 8px;background:<%= statusBg %>;color:<%= statusColor %>;border:1px solid <%= statusBorder %>;">
+              ● <%= statusText %>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1.5rem;align-items:center;">
+        <div style="text-align:right;">
+          <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;">Current Plan</div>
+          <div style="font-weight:700;font-size:1rem;color:var(--accent);">
+            <%= user.membership ? user.membership.name : 'No Membership' %>
+            <% if (user.membership) { %>
+              <span class="badge badge-<%= user.membership.level.toLowerCase().replace('+', '-plus') %>" style="font-size:0.7rem;vertical-align:middle;">
+                <%= user.membership.level %>
+              </span>
+            <% } %>
+          </div>
+          <% if (user.membershipExpiry) { %>
+            <div class="text-muted" style="font-size:0.75rem;margin-top:0.2rem;">
+              Expires: <%= new Date(user.membershipExpiry).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) %>
+            </div>
+          <% } %>
+        </div>
+        <a href="/member/plans" class="btn btn-sm btn-outline">Change Plan →</a>
+      </div>
+    </div>
+  </div>
+
+  <% if (typeof membershipInfo !== 'undefined' && membershipInfo) { %>
+    <% if (membershipInfo.status === 'grace') { %>
+      <!-- Grace Period Alert Banner -->
+      <div class="alert alert-warning" style="margin-top:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;background:rgba(245,158,11,0.1);border:1px solid #f59e0b;color:#f59e0b;padding:1rem 1.25rem;border-radius:10px;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span style="font-size:1.5rem;">⚠️</span>
+          <div>
+            <div style="font-weight:700;font-size:0.95rem;">Grace Period Active — <%= membershipInfo.graceDaysRemaining %> Day<%= membershipInfo.graceDaysRemaining === 1 ? '' : 's' %> Remaining</div>
+            <div style="font-size:0.83rem;margin-top:0.25rem;color:var(--text-muted);">
+              Your membership expired on <%= new Date(membershipInfo.expiryDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) %>. You have <%= membershipInfo.graceDaysRemaining %> day<%= membershipInfo.graceDaysRemaining === 1 ? '' : 's' %> remaining in your grace period. Your gym access & QR entry remain active. Please renew to avoid losing access.
+            </div>
+          </div>
+        </div>
+        <a href="/member/plans" class="btn btn-sm" style="background:#f59e0b;color:#000;font-weight:700;padding:8px 16px;border-radius:6px;text-decoration:none;">
+          Renew Membership →
+        </a>
+      </div>
+    <% } else if (membershipInfo.status === 'expired') { %>
+      <!-- Expired Alert Banner -->
+      <div class="alert alert-error" style="margin-top:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;background:rgba(239,68,68,0.1);border:1px solid #ef4444;color:#ef4444;padding:1rem 1.25rem;border-radius:10px;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span style="font-size:1.5rem;">🔒</span>
+          <div>
+            <div style="font-weight:700;font-size:0.95rem;">Membership Expired</div>
+            <div style="font-size:0.83rem;margin-top:0.25rem;color:var(--text-muted);">
+              Your membership and 3-day grace period have ended. QR generation and gym entry are disabled until renewal.
+            </div>
+          </div>
+        </div>
+        <a href="/member/plans" class="btn btn-sm btn-primary" style="font-weight:700;padding:8px 16px;">
+          Renew Membership Now →
+        </a>
+      </div>
+    <% } %>
+  <% } %>
+
+  <!-- Highlights Strip (Stats) -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;margin-top:1.5rem;">
+    <!-- Weight Stat -->
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Current Weight</div>
+      <div style="font-size:1.75rem;font-weight:800;margin-top:0.35rem;color:var(--accent);">
+        <%= weightStats.currentWeight ? weightStats.currentWeight + ' kg' : 'Not Logged' %>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">
+        <% if (weightStats.startingWeight) { %>
+          Start: <%= weightStats.startingWeight %> kg (<span style="color:<%= weightStats.weightChange <= 0 ? '#34d399' : '#f87171' %>"><%= weightStats.weightChange > 0 ? '+' : '' %><%= weightStats.weightChange %> kg</span>)
+        <% } else { %>
+          Log weight to track progress
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Attendance Stat -->
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Gym Attendance</div>
+      <div style="font-size:1.75rem;font-weight:800;margin-top:0.35rem;color:#60a5fa;">
+        <%= attendanceStats.count %> <span style="font-size:0.9rem;font-weight:500;">days</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">
+        Attendance Rate: <strong style="color:#60a5fa;"><%= attendanceStats.rate %>%</strong> (target: 20d)
+      </div>
+    </div>
+
+    <!-- Workout Status -->
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Workout Plan</div>
+      <div style="font-size:1.35rem;font-weight:700;margin-top:0.35rem;">
+        <%= workoutPlan ? (workoutPlan.exercises ? workoutPlan.exercises.length : 0) + ' Exercises' : 'No Routine' %>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">
+        <%= workoutPlan && workoutPlan.schedule ? workoutPlan.schedule : 'Assigned by your trainer' %>
+      </div>
+    </div>
+
+    <!-- Payment Status -->
+    <div class="card" style="padding:1.25rem;">
+      <div style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Payment Status</div>
+      <div style="font-size:1.35rem;font-weight:700;margin-top:0.35rem;color:#34d399;">
+        <%= latestPayment ? (latestPayment.status.toUpperCase() + ' (₹' + Number(latestPayment.amount).toLocaleString('en-IN') + ')') : (user.membership ? 'Paid / Active' : 'Pending') %>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">
+        <%= latestPayment ? 'Via ' + latestPayment.method.toUpperCase() : 'Standard Billing' %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assigned Trainer Section -->
+  <div style="margin-top:2rem;">
+    <div class="admin-header-row" style="margin-bottom:0.75rem;">
+      <h2 style="font-size:1.15rem;font-weight:700;">🏋️ My Trainer</h2>
+    </div>
+
+    <% if (trainer) { %>
+      <div class="trainer-profile-card">
+        <div class="trainer-profile-avatar">
+          <% 
+            const trName = trainer.name ? trainer.name.toLowerCase() : '';
+            const coachImg = trainer.profilePhoto || (trName.includes('sarah') ? '/images/coach_sarah.jpg' : trName.includes('david') ? '/images/coach_david.jpg' : '/images/coach_marcus.jpg');
+          %>
+          <img src="<%= coachImg %>" alt="<%= trainer.name %>" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+          <span style="display:none;"><%= trainer.name ? trainer.name.charAt(0).toUpperCase() : 'T' %></span>
+        </div>
+        <div class="trainer-profile-info">
+          <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Personal Coach</div>
+          <div class="trainer-profile-name"><%= trainer.name %></div>
+          <div class="trainer-profile-meta">
+            <% if (trainer.email) { %><span>✉️ <%= trainer.email %></span><% } %>
+            <% if (trainer.phone) { %><span>📞 <%= trainer.phone %></span><% } %>
+            <% if (trainer.specialization) { %><span>🎯 <%= trainer.specialization %></span><% } %>
+            <% if (trainer.experience) { %><span>⏳ <%= trainer.experience %> Experience</span><% } %>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <a href="/member/workout" class="btn btn-sm btn-primary">📋 View Workout</a>
+          <a href="/member/diet" class="btn btn-sm btn-outline">🥗 View Diet</a>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="detail-card" style="text-align:center;padding:1.5rem;">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">👤</div>
+        <div style="font-weight:600;">No Trainer Assigned Yet</div>
+        <p class="text-muted" style="font-size:0.85rem;margin-top:0.25rem;">
+          Your gym admin will assign a personal trainer to design your workout and diet plans.
+        </p>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- QR Gym Entry & Check-In Section -->
+  <div style="margin-top:2rem;">
+    <div class="admin-header-row" style="margin-bottom:0.75rem;">
+      <h2 style="font-size:1.15rem;font-weight:700;">📱 QR Gym Entry</h2>
+    </div>
+
+    <div class="detail-card" id="qr-entry-section">
+      <div style="text-align:center;padding:1rem 0;">
+
+        <% if (typeof membershipInfo !== 'undefined' && membershipInfo && !membershipInfo.canGenerateQr) { %>
+          <!-- Disabled State: Membership Expired -->
+          <div id="qr-expired-disabled-state" style="padding:1rem 0;">
+            <div style="font-size:3rem;margin-bottom:0.75rem;">🔒</div>
+            <p style="font-weight:700;font-size:1.1rem;color:#ef4444;margin-bottom:0.4rem;">
+              Gym Entry Pass Disabled
+            </p>
+            <p class="text-muted" style="font-size:0.88rem;max-width:440px;margin:0 auto 1.25rem;">
+              Your membership has expired and the 3-day grace period has ended. QR generation is disabled until you renew your membership.
+            </p>
+            <a href="/member/plans" class="btn btn-primary" style="font-weight:700;padding:10px 24px;">
+              💳 Renew Membership
+            </a>
+          </div>
+        <% } else { %>
+          <!-- Initial State: Generate QR Button -->
+          <div id="qr-initial-state">
+            <% if (typeof membershipInfo !== 'undefined' && membershipInfo && membershipInfo.status === 'grace') { %>
+              <div style="margin-bottom:0.75rem;">
+                <span style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:600;border:1px solid rgba(245,158,11,0.3);">
+                  ⚠️ Grace Period Active (<%= membershipInfo.graceDaysRemaining %>d left)
+                </span>
+              </div>
+            <% } %>
+            <div style="margin-bottom:1rem;">
+              <svg width="64" height="64" viewBox="0 0 100 100" fill="#666" opacity="0.4">
+                <rect width="30" height="30" rx="4"/><rect x="5" y="5" width="20" height="20" fill="#fff" rx="2"/>
+                <rect x="10" y="10" width="10" height="10" fill="#666"/><rect x="70" width="30" height="30" rx="4"/>
+                <rect x="75" y="5" width="20" height="20" fill="#fff" rx="2"/><rect x="80" y="10" width="10" height="10" fill="#666"/>
+                <rect y="70" width="30" height="30" rx="4"/><rect x="5" y="75" width="20" height="20" fill="#fff" rx="2"/>
+                <rect x="10" y="80" width="10" height="10" fill="#666"/><rect x="40" y="40" width="20" height="20"/>
+              </svg>
+            </div>
+            <p style="font-weight:600;font-size:1rem;margin-bottom:0.5rem;">Digital Gym Pass</p>
+            <p class="text-muted" style="font-size:0.85rem;margin-bottom:1.25rem;">
+              Generate a one-time QR code valid for 30 seconds.<br>
+              Show it at the gym entrance to check in.
+            </p>
+            <button type="button" id="btn-generate-qr" class="btn btn-primary" onclick="generateQR()">
+              🔑 Generate QR Code
+            </button>
+          </div>
+
+        <!-- Active QR State: Shows QR + Countdown -->
+        <div id="qr-active-state" style="display:none;">
+          <div style="position:relative;display:inline-block;margin-bottom:1rem;">
+            <!-- Countdown ring -->
+            <svg id="qr-countdown-ring" width="200" height="200" viewBox="0 0 200 200" style="position:absolute;top:-10px;left:-10px;z-index:2;pointer-events:none;">
+              <circle cx="100" cy="100" r="95" stroke="rgba(99,102,241,0.15)" stroke-width="4" fill="none"/>
+              <circle id="qr-ring-progress" cx="100" cy="100" r="95" stroke="#6366f1" stroke-width="4" fill="none"
+                      stroke-dasharray="597" stroke-dashoffset="0" stroke-linecap="round"
+                      transform="rotate(-90 100 100)" style="transition: stroke-dashoffset 1s linear;"/>
+            </svg>
+            <!-- QR Code Image -->
+            <img id="qr-code-image" src="" alt="QR Code" style="width:180px;height:180px;border-radius:12px;border:3px solid #6366f1;position:relative;z-index:1;" />
+          </div>
+          <div style="margin-top:0.5rem;">
+            <span id="qr-timer-text" style="font-size:1.5rem;font-weight:800;color:#6366f1;">30</span>
+            <span style="font-size:0.85rem;color:var(--text-muted);"> seconds remaining</span>
+          </div>
+          <div style="margin-top:0.5rem;">
+            <div style="background:rgba(99,102,241,0.1);border-radius:8px;padding:8px 16px;display:inline-block;">
+              <span style="font-size:0.78rem;color:#6366f1;font-weight:600;">⚡ Show this QR at the gym entrance</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expired State: QR has expired -->
+        <div id="qr-expired-state" style="display:none;">
+          <div style="margin-bottom:1rem;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <p style="font-weight:700;font-size:1rem;color:#ef4444;margin-bottom:0.5rem;">QR Code Expired</p>
+          <p class="text-muted" style="font-size:0.85rem;margin-bottom:1.25rem;">
+            Please generate a new QR code to check in.
+          </p>
+          <button type="button" class="btn btn-primary" onclick="generateQR()">
+            🔄 Generate New QR
+          </button>
+        </div>
+
+        <!-- Error State -->
+        <div id="qr-error-state" style="display:none;">
+          <p style="font-weight:600;color:#ef4444;margin-bottom:1rem;" id="qr-error-message"></p>
+          <button type="button" class="btn btn-primary" onclick="generateQR()">
+            🔄 Try Again
+          </button>
+        </div>
+      <% } %>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    let countdownInterval = null;
+
+    window.generateQR = async function() {
+      // Reset states
+      document.getElementById('qr-initial-state').style.display = 'none';
+      document.getElementById('qr-active-state').style.display = 'none';
+      document.getElementById('qr-expired-state').style.display = 'none';
+      document.getElementById('qr-error-state').style.display = 'none';
+
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      try {
+        const res = await fetch('/member/qr/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+          document.getElementById('qr-error-message').textContent = data.message || 'Failed to generate QR code.';
+          document.getElementById('qr-error-state').style.display = 'block';
+          return;
+        }
+
+        // Show QR
+        document.getElementById('qr-code-image').src = data.qrDataUrl;
+        document.getElementById('qr-active-state').style.display = 'block';
+
+        // Start countdown
+        const ttl = data.ttl || 30;
+        let remaining = ttl;
+        const circumference = 2 * Math.PI * 95; // ~597
+        const ringEl = document.getElementById('qr-ring-progress');
+        const timerEl = document.getElementById('qr-timer-text');
+
+        timerEl.textContent = remaining;
+        ringEl.style.strokeDashoffset = '0';
+
+        countdownInterval = setInterval(() => {
+          remaining--;
+          timerEl.textContent = remaining;
+          const offset = circumference * (1 - remaining / ttl);
+          ringEl.style.strokeDashoffset = offset;
+
+          // Color changes
+          if (remaining <= 10) {
+            timerEl.style.color = '#ef4444';
+            ringEl.setAttribute('stroke', '#ef4444');
+          } else if (remaining <= 20) {
+            timerEl.style.color = '#f59e0b';
+            ringEl.setAttribute('stroke', '#f59e0b');
+          } else {
+            timerEl.style.color = '#6366f1';
+            ringEl.setAttribute('stroke', '#6366f1');
+          }
+
+          if (remaining <= 0) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            document.getElementById('qr-active-state').style.display = 'none';
+            document.getElementById('qr-expired-state').style.display = 'block';
+          }
+        }, 1000);
+
+      } catch (err) {
+        document.getElementById('qr-error-message').textContent = 'Network error. Please try again.';
+        document.getElementById('qr-error-state').style.display = 'block';
+      }
+    };
+  })();
+  </script>
+
+  <!-- Quick Access Portals Grid -->
+  <div class="cards-grid" style="margin-top:2rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+
+    <div class="card">
+      <div class="card-icon">🏋️</div>
+      <h3>Workout Routine</h3>
+      <p>Custom sets, reps, and exercise schedule designed for your targets.</p>
+      <div style="margin-top:1.25rem;">
+        <a href="/member/workout" class="btn btn-sm btn-outline">View Routine →</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">🥗</div>
+      <h3>Diet & Meals</h3>
+      <p>Tailored nutrition, timings, and calorie balance from your trainer.</p>
+      <div style="margin-top:1.25rem;">
+        <a href="/member/diet" class="btn btn-sm btn-outline">View Diet Plan →</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">📈</div>
+      <h3>Weight & Progress</h3>
+      <p>Log body weight entries and visualize progress with our line chart.</p>
+      <div style="margin-top:1.25rem;">
+        <a href="/member/progress" class="btn btn-sm btn-outline">Open Progress →</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">📅</div>
+      <h3>Attendance Records</h3>
+      <p>Review check-in history, streak records, and attendance percentage.</p>
+      <div style="margin-top:1.25rem;">
+        <a href="/member/attendance" class="btn btn-sm btn-outline">View Attendance →</a>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

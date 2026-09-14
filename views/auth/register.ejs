@@ -1,0 +1,110 @@
+<%- include('../partials/header') %>
+
+<main class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <% if (selectedRole === 'admin') { %>🛡️<% } else if (selectedRole === 'trainer') { %>🥊<% } else { %>🏋️<% } %>
+    </div>
+    <h1 class="auth-title">
+      <% if (selectedRole === 'admin') { %>Admin Registration<% } else if (selectedRole === 'trainer') { %>Trainer Registration<% } else { %>Create Account<% } %>
+    </h1>
+    <p class="auth-subtitle">
+      <% if (selectedRole === 'admin') { %>Set up a gym administrator account<% } else if (selectedRole === 'trainer') { %>Apply as a certified fitness coach<% } else { %>Join FitZone and start your fitness journey<% } %>
+    </p>
+
+    <!-- Role Switcher Tabs -->
+    <div class="auth-role-tabs">
+      <a href="/auth/register?role=member" class="auth-role-tab <%= selectedRole === 'member' ? 'active' : '' %>">
+        🏋️ Member
+      </a>
+      <a href="/auth/register?role=trainer" class="auth-role-tab <%= selectedRole === 'trainer' ? 'active' : '' %>">
+        🥊 Trainer
+      </a>
+      <a href="/auth/register?role=admin" class="auth-role-tab <%= selectedRole === 'admin' ? 'active' : '' %>">
+        🛡️ Admin
+      </a>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-error" id="register-error"><%= error %></div>
+    <% } %>
+
+    <form action="/auth/register" method="POST" class="auth-form" id="register-form">
+      <input type="hidden" name="role" value="<%= selectedRole %>" />
+
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" placeholder="<%= selectedRole === 'trainer' ? 'Coach Sarah' : (selectedRole === 'admin' ? 'System Administrator' : 'John Doe') %>"
+               value="<%= formData.name || '' %>" required autocomplete="name" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="<%= selectedRole === 'trainer' ? 'trainer@fitzone.com' : (selectedRole === 'admin' ? 'admin@fitzone.com' : 'john@example.com') %>"
+               value="<%= formData.email || '' %>" required autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number <span class="optional">(optional)</span></label>
+        <input type="tel" id="phone" name="phone" placeholder="+91 98765 43210"
+               value="<%= formData.phone || '' %>" autocomplete="tel" />
+      </div>
+
+      <% if (selectedRole === 'trainer') { %>
+        <div class="form-group">
+          <label for="specialization">Specialization / Expertise</label>
+          <input type="text" id="specialization" name="specialization" placeholder="e.g., Strength, Hypertrophy, Crossfit, HIIT"
+                 value="<%= formData.specialization || '' %>" />
+        </div>
+
+        <div class="form-group">
+          <label for="experience">Years of Experience</label>
+          <input type="text" id="experience" name="experience" placeholder="e.g., 5+ Years"
+                 value="<%= formData.experience || '' %>" />
+        </div>
+      <% } else if (selectedRole === 'admin') { %>
+        <div class="form-group">
+          <label for="adminCode">Admin Security Code</label>
+          <input type="password" id="adminCode" name="adminCode" placeholder="Default: Admin@123"
+                 value="<%= formData.adminCode || '' %>" required />
+          <small class="text-muted" style="font-size:0.75rem;margin-top:4px;display:block;">Required for system administrative account creation.</small>
+        </div>
+      <% } else { %>
+        <div class="form-group">
+          <label for="dietPreference">Diet Preference <span class="optional">(optional)</span></label>
+          <select id="dietPreference" name="dietPreference">
+            <option value="">— Select —</option>
+            <option value="Vegetarian"     <%= formData.dietPreference === 'Vegetarian'     ? 'selected' : '' %>>Vegetarian</option>
+            <option value="Non-Vegetarian" <%= formData.dietPreference === 'Non-Vegetarian' ? 'selected' : '' %>>Non-Vegetarian</option>
+            <option value="Eggetarian"     <%= formData.dietPreference === 'Eggetarian'     ? 'selected' : '' %>>Eggetarian</option>
+            <option value="Vegan"          <%= formData.dietPreference === 'Vegan'          ? 'selected' : '' %>>Vegan</option>
+          </select>
+        </div>
+      <% } %>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Min. 6 characters"
+               required autocomplete="new-password" />
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter password"
+               required autocomplete="new-password" />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" id="register-submit-btn">
+        Register as <%= selectedRole === 'admin' ? 'Admin' : (selectedRole === 'trainer' ? 'Trainer' : 'Member') %>
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Already have an account? <a href="/auth/login?role=<%= selectedRole %>">Login</a>
+    </p>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
