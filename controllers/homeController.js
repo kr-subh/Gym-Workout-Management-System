@@ -20,8 +20,6 @@ const getHome = async (req, res, next) => {
 
     res.render('index', {
       title: 'FitZone — Build Your Stronger Self',
-      message: 'Welcome to FitZone Gym Management System',
-      status: 'Application is running successfully!',
       plans: plans || [],
       trainers,
     });

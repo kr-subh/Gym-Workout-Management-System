@@ -12,7 +12,7 @@ const connectDB = async () => {
     return conn;
   } catch (err) {
     console.warn(`⚠️  MongoDB Connection Warning: ${err.message}`);
-    console.warn('ℹ️  Proceeding with in-memory store so all features remain functional.');
+    console.warn('⚠️  The application requires MongoDB to function. Please check your MONGODB_URI in .env.');
     return null;
   }
 };

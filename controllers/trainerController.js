@@ -5,12 +5,21 @@ const DietPlan    = require('../models/DietPlan');
 const Weight      = require('../models/Weight');
 const Attendance  = require('../models/Attendance');
 
-// Helper: Ensure the requested member is assigned to this trainer
+// Helper: Verify the member exists AND is assigned to this trainer
 const getAssignedMember = async (trainerId, memberId) => {
   if (!mongoose.isValidObjectId(memberId)) return null;
   return User.findOne({ _id: memberId, role: 'member', trainer: trainerId })
     .populate('membership')
     .lean();
+};
+
+// Helper: Render a 403 Access Denied page
+const denyAccess = (res, message) => {
+  return res.status(403).render('error', {
+    title: 'Access Denied',
+    statusCode: 403,
+    message,
+  });
 };
 
 // ─── TRAINER DASHBOARD ────────────────────────────────────────────
@@ -49,13 +58,7 @@ const getMemberWorkoutPlan = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to manage this member\'s workout plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to manage this member\'s workout plans.');
 
     const plan = await WorkoutPlan.findOne({ member: memberId }).lean();
 
@@ -78,13 +81,7 @@ const showCreateWorkoutForm = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to manage this member\'s workout plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to manage this member\'s workout plans.');
 
     const existing = await WorkoutPlan.findOne({ member: memberId });
     if (existing) {
@@ -143,13 +140,7 @@ const createWorkoutPlan = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to manage this member\'s workout plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to manage this member\'s workout plans.');
 
     const { schedule, notes, exercises } = parseWorkoutBody(req.body);
 
@@ -199,13 +190,7 @@ const showEditWorkoutForm = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to manage this member\'s workout plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to manage this member\'s workout plans.');
 
     const plan = await WorkoutPlan.findOne({ member: memberId }).lean();
     if (!plan) {
@@ -231,13 +216,7 @@ const updateWorkoutPlan = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to manage this member\'s workout plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to manage this member\'s workout plans.');
 
     const { schedule, notes, exercises } = parseWorkoutBody(req.body);
 
@@ -280,13 +259,7 @@ const deleteWorkoutPlan = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to delete this member\'s workout plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to delete this member\'s workout plans.');
 
     await WorkoutPlan.findOneAndDelete({ member: memberId });
     res.redirect(`/trainer/dashboard?success=Workout plan deleted for ${member.name}`);
@@ -304,13 +277,7 @@ const getMemberDietPlan = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to manage this member\'s diet plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to manage this member\'s diet plans.');
 
     const plan = await DietPlan.findOne({ member: memberId }).lean();
 
@@ -333,13 +300,7 @@ const showCreateDietForm = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to manage this member\'s diet plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to manage this member\'s diet plans.');
 
     const existing = await DietPlan.findOne({ member: memberId });
     if (existing) {
@@ -400,13 +361,7 @@ const createDietPlan = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to manage this member\'s diet plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to manage this member\'s diet plans.');
 
     const { dietPreference, notes, meals } = parseDietBody(req.body);
 
@@ -456,13 +411,7 @@ const showEditDietForm = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to manage this member\'s diet plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to manage this member\'s diet plans.');
 
     const plan = await DietPlan.findOne({ member: memberId }).lean();
     if (!plan) {
@@ -488,13 +437,7 @@ const updateDietPlan = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to manage this member\'s diet plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to manage this member\'s diet plans.');
 
     const { dietPreference, notes, meals } = parseDietBody(req.body);
 
@@ -537,13 +480,7 @@ const deleteDietPlan = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to delete this member\'s diet plans.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to delete this member\'s diet plans.');
 
     await DietPlan.findOneAndDelete({ member: memberId });
     res.redirect(`/trainer/dashboard?success=Diet plan deleted for ${member.name}`);
@@ -561,13 +498,7 @@ const getMemberProgress = async (req, res, next) => {
     const memberId  = req.params.memberId;
 
     const member = await getAssignedMember(trainerId, memberId);
-    if (!member) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        statusCode: 403,
-        message: 'You are not authorised to view this member\'s progress.',
-      });
-    }
+    if (!member) return denyAccess(res, 'You are not authorised to view this member\'s progress.');
 
     const [weights, attendances] = await Promise.all([
       Weight.find({ member: memberId }).sort({ date: 1 }).lean(),
