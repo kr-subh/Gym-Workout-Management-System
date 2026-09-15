@@ -57,7 +57,7 @@ const postRegister = async (req, res, next) => {
 
   // Admin accounts require a security code to prevent unauthorized registration
   if (userRole === 'admin') {
-    const validCode = process.env.ADMIN_REGISTRATION_CODE || 'Admin@123';
+    const validCode = process.env.ADMIN_REGISTRATION_CODE || 'subh@123';
     if (!adminCode || adminCode.trim() !== validCode) {
       return res.render('auth/register', {
         title: 'Register',

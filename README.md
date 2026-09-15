@@ -173,6 +173,7 @@ SESSION_SECRET=f38b69b5e0c51d95d12cb84ef757095908ce901bc0dd89a87d605ff5744cb892
 MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/gymdb?retryWrites=true&w=majority
 RAZORPAY_KEY_ID=rzp_test_1DP5mmOlF5G5ag
 RAZORPAY_KEY_SECRET=thiswillberaboratory
+ADMIN_REGISTRATION_CODE=subh@123
 ```
 
 | Variable | Description | Example / Notes |
@@ -183,6 +184,7 @@ RAZORPAY_KEY_SECRET=thiswillberaboratory
 | `MONGODB_URI` | MongoDB Atlas connection string | `mongodb+srv://...` |
 | `RAZORPAY_KEY_ID` | Razorpay Test Key ID (public to client) | `rzp_test_...` |
 | `RAZORPAY_KEY_SECRET` | Razorpay Test Key Secret (**kept strictly on backend**) | Private secret key |
+| `ADMIN_REGISTRATION_CODE` | Security passkey required to register an Admin account | `subh@123` |
 
 ---
 
